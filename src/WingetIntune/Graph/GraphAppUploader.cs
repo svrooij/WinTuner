@@ -6,7 +6,7 @@ using WingetIntune.Intune;
 using WingetIntune.Models;
 
 namespace WingetIntune.Graph;
-public class GraphAppUploader
+public partial class GraphAppUploader
 {
     private readonly ILogger<GraphAppUploader> logger;
     private readonly IFileManager fileManager;
@@ -79,7 +79,7 @@ public class GraphAppUploader
                 Value = await fileManager.ReadAllBytesAsync(logoPath, cancellationToken)
             };
         }
-        logger.LogInformation("Creating new Win32LobApp");
+        LogCreatingNewWin32LobApp();
         string? appId = null;
         try
         {
@@ -99,12 +99,12 @@ public class GraphAppUploader
         }
         catch (Microsoft.Identity.Client.MsalServiceException ex)
         {
-            logger.LogError(ex, "Error publishing app, auth failed {message}", ex.Message);
+            LogErrorPublishingAppAuthFailed(ex, ex.Message);
             throw;
         }
         catch (ODataError ex)
         {
-            logger.LogError(ex, "Error publishing app, deleting the remains {message}", ex.Error?.Message);
+            LogErrorPublishingAppWithCleanup(ex, ex.Error?.Message ?? "Unknown OData error");
             if (appId != null)
             {
                 try
@@ -113,14 +113,14 @@ public class GraphAppUploader
                 }
                 catch (Exception ex2)
                 {
-                    logger.LogError(ex2, "Error deleting app");
+                    LogErrorDeletingApp(ex2);
                 }
             }
             throw;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error publishing app, deleting the remains");
+            LogErrorPublishingAppWithCleanup(ex, ex.Message);
             if (appId != null)
             {
                 try
@@ -130,7 +130,7 @@ public class GraphAppUploader
                 }
                 catch (Exception ex2)
                 {
-                    logger.LogError(ex2, "Error deleting app");
+                    LogErrorDeletingApp(ex2);
                 }
             }
             throw;
@@ -175,7 +175,7 @@ public class GraphAppUploader
         {
             throw new FileNotFoundException("IntuneWin file not found", partialIntuneWinFile);
         }
-        logger.LogInformation("Creating new content version for app {appId}", appId);
+        LogCreatingNewContentVersion(appId);
 
         // Load the metadata file
         var info = IntuneMetadata.GetApplicationInfo(await fileManager.ReadAllBytesAsync(metadataFile, cancellationToken))!;
@@ -183,7 +183,7 @@ public class GraphAppUploader
         // Create the content version
         var contentVersion = await graphServiceClient.DeviceAppManagement.MobileApps[appId].GraphWin32LobApp.ContentVersions.PostAsync(new MobileAppContent(), cancellationToken: cancellationToken);
         //var contentVersion = await graphServiceClient.Intune_CreateWin32LobAppContentVersionAsync(appId, cancellationToken);
-        logger.LogDebug("Created content version {id}", contentVersion!.Id);
+        LogCreatedContentVersion(contentVersion!.Id!);
 
         var mobileAppContentFileRequest = new MobileAppContentFile
         {
@@ -194,23 +194,23 @@ public class GraphAppUploader
             Manifest = null,
         };
 
-        logger.LogDebug("Creating content file {name} {size} {sizeEncrypted}", mobileAppContentFileRequest.Name, mobileAppContentFileRequest.Size, mobileAppContentFileRequest.SizeEncrypted);
+        LogCreatingContentFile(mobileAppContentFileRequest.Name!, mobileAppContentFileRequest.Size!.Value, mobileAppContentFileRequest.SizeEncrypted!.Value);
 
         MobileAppContentFile? mobileAppContentFile = await graphServiceClient.DeviceAppManagement.MobileApps[appId].GraphWin32LobApp.ContentVersions[contentVersion.Id!].Files.PostAsync(mobileAppContentFileRequest, cancellationToken: cancellationToken);
-        logger.LogDebug("Created content file {id}", mobileAppContentFile?.Id);
+        LogCreatedContentFile(mobileAppContentFile!.Id!);
         // Wait for a bit (it's generating the azure storage uri)
         await Task.Delay(3000, cancellationToken);
 
         MobileAppContentFile? updatedMobileAppContentFile = await graphServiceClient.DeviceAppManagement.MobileApps[appId].GraphWin32LobApp.ContentVersions[contentVersion.Id!].Files[mobileAppContentFile!.Id!].GetAsync(cancellationToken: cancellationToken);
 
-        logger.LogDebug("Loaded content file {id} {blobUri}", updatedMobileAppContentFile?.Id, updatedMobileAppContentFile?.AzureStorageUri);
+        LogLoadedContentFile(updatedMobileAppContentFile!.Id!, updatedMobileAppContentFile.AzureStorageUri!);
 
         await azureFileUploader.UploadFileToAzureAsync(
             partialIntuneWinFile,
             new Uri(updatedMobileAppContentFile!.AzureStorageUri!),
             cancellationToken);
 
-        logger.LogDebug("Uploaded content file {id} {blobUri}", updatedMobileAppContentFile.Id, updatedMobileAppContentFile.AzureStorageUri);
+        LogUploadedContentFile(updatedMobileAppContentFile.Id!, updatedMobileAppContentFile.AzureStorageUri!);
 
         var encryptionInfo = mapper.ToFileEncryptionInfo(info.EncryptionInfo);
         await graphServiceClient.Intune_CommitWin32LobAppContentVersionFileAsync(appId,
@@ -221,7 +221,7 @@ public class GraphAppUploader
 
         MobileAppContentFile? commitedFile = await graphServiceClient.Intune_WaitForFinalCommitStateAsync(appId, contentVersion!.Id!, mobileAppContentFile!.Id!, cancellationToken);
 
-        logger.LogInformation("Added content version {contentVersionId} to app {appId}", contentVersion.Id, appId);
+        LogAddedContentVersion(contentVersion.Id!, appId);
 
         var app = await graphServiceClient.DeviceAppManagement.MobileApps[appId].PatchAsync(new Win32LobApp
         {
@@ -230,4 +230,37 @@ public class GraphAppUploader
 
         return app;
     }
+
+    [LoggerMessage(EventId = 300, Level = LogLevel.Debug, Message = "Creating new Win32LobApp")]
+    private partial void LogCreatingNewWin32LobApp();
+
+    [LoggerMessage(EventId = 301, Level = LogLevel.Error, Message = "Error publishing app, auth failed {Message}")]
+    private partial void LogErrorPublishingAppAuthFailed(Exception ex, string Message);
+
+    [LoggerMessage(EventId = 302, Level = LogLevel.Error, Message = "Error publishing app, deleting the remains {Message}")]
+    private partial void LogErrorPublishingAppWithCleanup(Exception ex, string? Message = null);
+
+    [LoggerMessage(EventId = 303, Level = LogLevel.Error, Message = "Error deleting app")]
+    private partial void LogErrorDeletingApp(Exception ex);
+
+    [LoggerMessage(EventId = 305, Level = LogLevel.Debug, Message = "Creating new content version for app {AppId}")]
+    private partial void LogCreatingNewContentVersion(string AppId);
+
+    [LoggerMessage(EventId = 306, Level = LogLevel.Debug, Message = "Created content version {Id}")]
+    private partial void LogCreatedContentVersion(string Id);
+
+    [LoggerMessage(EventId = 307, Level = LogLevel.Debug, Message = "Creating content file {Name} {Size} {SizeEncrypted}")]
+    private partial void LogCreatingContentFile(string Name, long Size, long SizeEncrypted);
+
+    [LoggerMessage(EventId = 308, Level = LogLevel.Debug, Message = "Created content file {Id}")]
+    private partial void LogCreatedContentFile(string Id);
+
+    [LoggerMessage(EventId = 309, Level = LogLevel.Debug, Message = "Loaded content file {Id} {BlobUri}")]
+    private partial void LogLoadedContentFile(string Id, string BlobUri);
+
+    [LoggerMessage(EventId = 310, Level = LogLevel.Debug, Message = "Uploaded content file {Id} {BlobUri}")]
+    private partial void LogUploadedContentFile(string Id, string BlobUri);
+
+    [LoggerMessage(EventId = 311, Level = LogLevel.Information, Message = "Added content version {ContentVersionId} to app {AppId}")]
+    private partial void LogAddedContentVersion(string ContentVersionId, string AppId);
 }

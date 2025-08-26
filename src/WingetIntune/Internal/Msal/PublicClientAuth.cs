@@ -8,7 +8,7 @@ using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace WingetIntune.Internal.Msal;
 
-public sealed class PublicClientAuth : IAuthenticationProvider
+public partial class PublicClientAuth : IAuthenticationProvider
 {
     private readonly PublicClientOptions _options;
     private readonly IPublicClientApplication publicClientApplication;
@@ -98,7 +98,7 @@ public sealed class PublicClientAuth : IAuthenticationProvider
         try
         {
             authenticationResult = await publicClientApplication.AcquireTokenSilent(scopes, account).ExecuteAsync(cancellationToken);
-            logger.LogTrace("Acquired token silently {@scopes} {tenantId} {username}", scopes, tenantId ?? authenticationResult.TenantId, authenticationResult.Account.Username);
+            LogAcquiredTokenSilently(scopes, tenantId ?? authenticationResult.TenantId, authenticationResult.Account.Username);
             return authenticationResult;
         }
         catch (MsalUiRequiredException)
@@ -116,7 +116,7 @@ public sealed class PublicClientAuth : IAuthenticationProvider
 
         if (!CacheLoaded)
             await LoadCache();
-        logger.LogInformation("Acquiring token interactively {@scopes} {tenantId} {userId}", scopes, tenantId, userId);
+        LogAcquiringTokenInteractive(scopes, tenantId, userId);
         var builder = publicClientApplication.AcquireTokenInteractive(scopes);
         if (!string.IsNullOrWhiteSpace(tenantId))
         {
@@ -151,6 +151,13 @@ public sealed class PublicClientAuth : IAuthenticationProvider
             request.AddHeaders(headers);
         }
     }
+
+    [LoggerMessage(EventId = 100, Level = Microsoft.Extensions.Logging.LogLevel.Information, Message = "Acquiring token interactively {Scopes} {TenantId} {UserId}")]
+    private partial void LogAcquiringTokenInteractive(IEnumerable<string> Scopes, string? TenantId, string? UserId);
+
+    // logger.LogTrace("Acquired token silently {@scopes} {tenantId} {username}", scopes, tenantId ?? authenticationResult.TenantId, authenticationResult.Account.Username);
+    [LoggerMessage(EventId = 101, Level = Microsoft.Extensions.Logging.LogLevel.Trace, Message = "Acquired token silently {Scopes} {TenantId} {UserId}")]
+    private partial void LogAcquiredTokenSilently(IEnumerable<string> Scopes, string? TenantId, string? UserId);
 }
 
 public class PublicClientOptions

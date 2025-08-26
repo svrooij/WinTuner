@@ -1,5 +1,6 @@
 ﻿using Microsoft.Kiota.Abstractions.Authentication;
 using Svrooij.PowerShell.DI;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 using System;
 using System.Collections.Generic;
 using System.IO;

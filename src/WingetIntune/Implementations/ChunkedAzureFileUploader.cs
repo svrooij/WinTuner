@@ -3,7 +3,7 @@ using System.Text;
 
 namespace WingetIntune.Implementations;
 
-public class ChunkedAzureFileUploader : IAzureFileUploader
+public partial class ChunkedAzureFileUploader : IAzureFileUploader
 {
     private const string IsoEncoding = "iso-8859-1";
     private const int DefaultChunkSize = 6 * 1024 * 1024;
@@ -27,7 +27,7 @@ public class ChunkedAzureFileUploader : IAzureFileUploader
         ArgumentNullException.ThrowIfNullOrEmpty(filename);
         ArgumentNullException.ThrowIfNull(sasUri);
 #endif
-        logger.LogInformation("Uploading {filename} to {sasUri}", filename, sasUri);
+        LogUploadingFile(filename, sasUri.ToString());
 
         try
         {
@@ -41,7 +41,7 @@ public class ChunkedAzureFileUploader : IAzureFileUploader
 
             List<string> chunks = new();
 
-            logger.LogDebug("File is {fileSize} bytes, will be uploaded in {chunkCount} chunks", fileSize, chunkCount);
+            LogFileChunkInfo(fileSize, chunkCount);
 
             for (int chunk = 0; chunk < chunkCount; chunk++)
             {
@@ -52,16 +52,16 @@ public class ChunkedAzureFileUploader : IAzureFileUploader
                 byte[] chunkData = reader.ReadBytes(length);
                 //byte[] chunkData = data[start..(start + length)];
 
-                logger.LogDebug("Uploading chunk {chunk} of {chunkCount} ({start} - {end})", chunk, chunkCount, start, start + length);
+                LogUploadingChunk(chunk, chunkCount, start, start + length);
                 await UploadChunkAsync(chunkId, chunkData, sasUri, cancellationToken);
             }
 
-            logger.LogDebug("Finalizing chunk upload");
+            LogFinalizingUpload();
             await FinalizeChunkUpload(sasUri, chunks, cancellationToken);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to upload {filename} to {sasUri}", filename, sasUri);
+            LogUploadFailed(ex, filename, sasUri.ToString());
             throw;
         }
     }
@@ -93,4 +93,19 @@ public class ChunkedAzureFileUploader : IAzureFileUploader
         var response = await httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
     }
+
+    [LoggerMessage(EventId = 200, Level = LogLevel.Debug, Message = "Uploading {Filename} to {SasUri}")]
+    private partial void LogUploadingFile(string Filename, string SasUri);
+
+    [LoggerMessage(EventId = 201, Level = LogLevel.Debug, Message = "File is {FileSize} bytes, will be uploaded in {ChunkCount} chunks")]
+    private partial void LogFileChunkInfo(int FileSize, int ChunkCount);
+
+    [LoggerMessage(EventId = 202, Level = LogLevel.Debug, Message = "Uploading chunk {Chunk} of {ChunkCount} ({Start} - {End})")]
+    private partial void LogUploadingChunk(int Chunk, int ChunkCount, int Start, int End);
+
+    [LoggerMessage(EventId = 203, Level = LogLevel.Debug, Message = "Finalizing chunk upload")]
+    private partial void LogFinalizingUpload();
+
+    [LoggerMessage(EventId = 204, Level = LogLevel.Error, Message = "Failed to upload {Filename} to {SasUri}")]
+    private partial void LogUploadFailed(Exception ex, string Filename, string SasUri);
 }

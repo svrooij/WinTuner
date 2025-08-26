@@ -42,11 +42,11 @@ public partial class UnprotectIntuneWinPackage : DependencyCmdlet<Startup>
         HelpMessage = "Destination folder")]
     public string DestinationPath { get; set; }
 
-    [ServiceDependency]
+    [ServiceDependency(Required = true)]
     private SvRooij.ContentPrep.Packager packager;
 
     [ServiceDependency]
-    private ILogger<UnprotectIntuneWinPackage> logger;
+    private ILogger<UnprotectIntuneWinPackage>? logger;
 
     /// <inheritdoc/>
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
@@ -68,7 +68,7 @@ public partial class UnprotectIntuneWinPackage : DependencyCmdlet<Startup>
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error unlocking package");
+            logger?.LogError(ex, "Error unlocking package");
         }
     }
 }

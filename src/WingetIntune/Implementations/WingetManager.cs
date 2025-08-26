@@ -195,10 +195,10 @@ public partial class WingetManager : IWingetRepository
     [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Installing package {id} {version}")]
     private partial void LogInstall(string id, string? version);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Getting package info for {id} {version}")]
+    [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "Getting package info for {id} {version}")]
     private partial void LogGetPackageInfo(string id, string? version);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Getting package info for {id} {version} from github")]
+    [LoggerMessage(EventId = 5, Level = LogLevel.Debug, Message = "Getting package info for {id} {version} from github")]
     private partial void LogGetPackageInfoFromManifest(string id, string? version);
 
     [LoggerMessage(EventId = 100, Level = LogLevel.Warning, Message = "Error getting package info for {id} {version}:\r\n{error}")]

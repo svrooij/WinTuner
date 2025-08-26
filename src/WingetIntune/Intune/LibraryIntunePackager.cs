@@ -5,7 +5,7 @@ using WingetIntune.Models;
 
 namespace WingetIntune.Intune;
 
-internal class LibraryIntunePackager : IIntunePackager
+internal partial class LibraryIntunePackager : IIntunePackager
 {
     private readonly Packager packager;
     private readonly ILogger logger;
@@ -18,7 +18,7 @@ internal class LibraryIntunePackager : IIntunePackager
 
     public async Task<string> CreatePackage(string inputFolder, string outputFolder, string installerFilename, PackageInfo? packageInfo = null, bool partialPackage = false, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Creating Intune package from {inputFolder}", inputFolder);
+        LogCreatingPackage(inputFolder);
         var details = new SvRooij.ContentPrep.Models.ApplicationDetails
         {
             Name = packageInfo?.DisplayName ?? packageInfo?.PackageIdentifier,
@@ -53,4 +53,7 @@ internal class LibraryIntunePackager : IIntunePackager
         _ = await packager.CreatePackage(inputFolder, Path.Combine(inputFolder, installerFilename), outputFolder, details, cancellationToken);
         return Path.GetFileNameWithoutExtension(installerFilename) + ".intunewin";
     }
+
+    [LoggerMessage(EventId = 100, Level = LogLevel.Debug, Message = "Creating Intune package from {InputFolder}")]
+    private partial void LogCreatingPackage(string InputFolder);
 }

@@ -12,6 +12,7 @@ using WingetIntune.Extensions;
 using WingetIntune.Graph;
 using Svrooij.WinTuner.Proxy.Client;
 using GraphModels = Microsoft.Graph.Beta.Models;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <summary>

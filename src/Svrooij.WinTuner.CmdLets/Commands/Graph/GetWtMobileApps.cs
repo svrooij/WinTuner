@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WingetIntune.Graph;
 using Svrooij.WinTuner.Proxy.Client;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 
@@ -93,13 +94,11 @@ public partial class GetWtMobileApps : BaseIntuneCmdlet
 
         if (apps is null || apps.Value?.Any() != true)
         {
-            WriteObject(new List<Microsoft.Graph.Beta.Models.MobileApp>(), true);
             return;
         }
 
         var vc = new WingetIntune.Models.StringVersionComparer();
         var result = apps.Value!.ToArray();
-               
         this.WriteCollection(result);
     }
 }

@@ -73,7 +73,7 @@ public partial class SearchWtWinGetPackage : DependencyCmdlet<Startup>
     HelpMessage = "Only return packages updated after this date")]
     public DateTime? UpdatedAfter { get; set; }
 
-    [ServiceDependency]
+    [ServiceDependency(Required = true)]
     private Winget.CommunityRepository.WingetRepository wingetRepository;
 
     /// <inheritdoc />

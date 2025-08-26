@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Kiota.Abstractions.Authentication;
 using WingetIntune.Graph;
 
-namespace Svrooij.WinTuner.CmdLets.Commands;
+namespace Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 /// <summary>
 /// <para type="synopsis">Update an app in Intune</para>
@@ -70,7 +70,7 @@ public class UpdateWtIntuneApp : BaseIntuneCmdlet
     private ILogger<UpdateWtIntuneApp>? logger;
 
     [ServiceDependency]
-    private WingetIntune.Graph.GraphClientFactory? gcf;
+    private GraphClientFactory? gcf;
 
     /// <inheritdoc/>
     protected override async Task ProcessAuthenticatedAsync(IAuthenticationProvider provider, CancellationToken cancellationToken)
@@ -85,9 +85,9 @@ public class UpdateWtIntuneApp : BaseIntuneCmdlet
             await graphServiceClient.AddIntuneCategoriesToAppAsync(AppId!, Categories, cancellationToken);
         }
 
-        if ((AvailableFor is not null && AvailableFor.Any()) ||
-            (RequiredFor is not null && RequiredFor.Any()) ||
-            (UninstallFor is not null && UninstallFor.Any()))
+        if (AvailableFor is not null && AvailableFor.Any() ||
+            RequiredFor is not null && RequiredFor.Any() ||
+            UninstallFor is not null && UninstallFor.Any())
         {
             logger?.LogInformation("Assigning app {appId} to groups", AppId);
             await graphServiceClient.AssignAppAsync(AppId!, RequiredFor, AvailableFor, UninstallFor, EnableAutoUpdate, cancellationToken);

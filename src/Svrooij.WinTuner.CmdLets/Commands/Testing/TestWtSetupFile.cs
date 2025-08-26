@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WingetIntune.Testing;
 
-namespace Svrooij.WinTuner.CmdLets.Commands;
+namespace Svrooij.WinTuner.CmdLets.Commands.Testing;
 /// <summary>
 /// <para type="synopsis">Test your silent install switches</para>
 /// <para type="description">Test if a setup will install on the Windows Sandbox</para>

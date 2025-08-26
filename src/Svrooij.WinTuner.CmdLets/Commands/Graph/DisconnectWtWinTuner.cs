@@ -4,7 +4,7 @@ using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Svrooij.WinTuner.CmdLets.Commands;
+namespace Svrooij.WinTuner.CmdLets.Commands.Graph;
 /// <summary>
 /// <para type="synopsis">Clear authentication data from module</para>
 /// <para type="description">You can call Connect-WtWinTuner which will keep security things in memory, to be able to clear things we made this command</para>

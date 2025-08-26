@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using WingetIntune.Intune;
 using WingetIntune.Testing;
 
-namespace Svrooij.WinTuner.CmdLets.Commands;
+namespace Svrooij.WinTuner.CmdLets.Commands.Testing;
 /// <summary>
 /// <para type="synopsis">Test if a package will install</para>
 /// <para type="description">Use the Windows Sandbox to test if the provided installer arguments will make it install silently and if it exists with the expected exit code.</para>
@@ -162,10 +162,10 @@ public class TestWtIntuneWin : DependencyCmdlet<Startup>
     private ILogger<TestWtIntuneWin>? logger;
 
     [ServiceDependency]
-    private WingetIntune.Testing.WindowsSandbox? sandbox;
+    private WindowsSandbox? sandbox;
 
     [ServiceDependency]
-    private WingetIntune.Intune.MetadataManager? metadataManager;
+    private MetadataManager? metadataManager;
 
     /// <inheritdoc/>
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)

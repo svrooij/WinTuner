@@ -5,6 +5,7 @@ using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
 using Svrooij.WinTuner.Proxy.Client;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <summary>
@@ -167,15 +168,15 @@ public partial class NewWtWingetPackage : DependencyCmdlet<Startup>
     public SwitchParameter PartialPackage { get; set; }
 
     [ServiceDependency]
-    private ILogger<NewWtWingetPackage> logger;
+    private ILogger<NewWtWingetPackage>? logger;
 
-    [ServiceDependency]
+    [ServiceDependency(Required = true)]
     private Winget.CommunityRepository.WingetRepository wingetRepository;
 
-    [ServiceDependency]
+    [ServiceDependency(Required = true)]
     private WingetIntune.IWingetRepository repository;
 
-    [ServiceDependency]
+    [ServiceDependency(Required = true)]
     private WingetIntune.IntuneManager intuneManager;
 
     [ServiceDependency]
@@ -190,7 +191,7 @@ public partial class NewWtWingetPackage : DependencyCmdlet<Startup>
         PackageId = (await wingetRepository!.GetPackageId(PackageId!, cancellationToken)) ?? PackageId;
         if (string.IsNullOrEmpty(PackageId))
         {
-            logger.LogWarning("Package {PackageId} not found", PackageId);
+            logger?.LogWarning("Package {PackageId} not found", PackageId);
             return;
         }
 
@@ -204,7 +205,7 @@ public partial class NewWtWingetPackage : DependencyCmdlet<Startup>
             versionless = PackageScript;
         }
 
-        logger.LogInformation("Packaging package {PackageId} {Version}", PackageId, Version);
+        logger?.LogInformation("Packaging package {PackageId} {Version}", PackageId, Version);
         var command = nameof(NewWtWingetPackage);
         if (versionless)
         {
@@ -215,7 +216,7 @@ public partial class NewWtWingetPackage : DependencyCmdlet<Startup>
 
         if (packageInfo != null)
         {
-            logger.LogDebug("Package {PackageId} {Version} from {Source}", packageInfo.PackageIdentifier, packageInfo.Version, packageInfo.Source);
+            logger?.LogDebug("Package {PackageId} {Version} from {Source}", packageInfo.PackageIdentifier, packageInfo.Version, packageInfo.Source);
 
             var package = await intuneManager.GenerateInstallerPackage(
                 TempFolder!,
@@ -240,7 +241,7 @@ public partial class NewWtWingetPackage : DependencyCmdlet<Startup>
         }
         else
         {
-            logger.LogWarning("Package {PackageId} not found", PackageId);
+            logger?.LogWarning("Package {PackageId} not found", PackageId);
         }
     }
 }

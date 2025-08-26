@@ -24,7 +24,7 @@ public class Startup : PsStartup
     {
         return builder =>
         {
-            builder.DefaultLevel = LogLevel.Information;
+            builder.DefaultLevel = LogLevel.Debug;
             builder.LogLevel.Add("System.Net.Http.HttpClient", LogLevel.Warning);
             builder.LogLevel.Add("System.Net.Http.HttpClient.GraphClientFactory.LogicalHandler", LogLevel.Warning);
             builder.IncludeCategory = true;

@@ -9,6 +9,7 @@ using WingetIntune.Graph;
 using GraphModels = Microsoft.Graph.Beta.Models;
 using System.Linq;
 using Svrooij.WinTuner.Proxy.Client;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <summary>

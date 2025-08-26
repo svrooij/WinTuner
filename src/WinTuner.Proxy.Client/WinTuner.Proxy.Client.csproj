@@ -8,9 +8,9 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.19.0" />
-		<PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.19.0" />
-		<PackageReference Include="Microsoft.Kiota.Serialization.Json" Version="1.19.0" />
+		<PackageReference Include="Microsoft.Kiota.Abstractions" Version="1.19.1" />
+		<PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.19.1" />
+		<PackageReference Include="Microsoft.Kiota.Serialization.Json" Version="1.19.1" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
 		<PackageReference Include="System.Text.Json" Version="8.0.6" />
 	</ItemGroup>
@@ -27,7 +27,7 @@
 		<Exec Command="dotnet tool install --global Microsoft.OpenApi.Kiota" />
 		<Message Text="Kiota installed. Will try to generate REST Client again" Importance="High" />
 		<Exec Command="kiota generate --ll Error -l CSharp -c WinTunerProxyClient -n Svrooij.WinTuner.Proxy.Client -d $(ProxyBaseUrl)swagger.json -o ./Generated --serializer Microsoft.Kiota.Serialization.Json.JsonSerializationWriterFactory --deserializer Microsoft.Kiota.Serialization.Json.JsonParseNodeFactory" Condition="!Exists('./Generated/WinTunerProxyClient.cs')" />
-		<OnError ExecuteTargets="KiotaNotAvailableError"/>
+		<OnError ExecuteTargets="KiotaNotAvailableError" />
 		
 	</Target>
 

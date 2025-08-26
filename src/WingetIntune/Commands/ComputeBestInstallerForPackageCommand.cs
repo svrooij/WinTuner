@@ -137,6 +137,6 @@ public partial class ComputeBestInstallerForPackageCommand
         }
     }
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Computing best installer for {PackageIdentifier} {Version} {Architecture}")]
+    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "Computing best installer for {PackageIdentifier} {Version} {Architecture}")]
     private partial void LogComputingBestInstaller(string PackageIdentifier, string Version, Architecture Architecture);
 }

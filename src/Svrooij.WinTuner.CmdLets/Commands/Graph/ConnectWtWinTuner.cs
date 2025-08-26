@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Svrooij.WinTuner.CmdLets.Commands;
+namespace Svrooij.WinTuner.CmdLets.Commands.Graph;
 /// <summary>
 /// <para type="synopsis">Connect to Intune</para>
 /// <para type="description">A separate command to select the correct authentication provider, you no longer have to provide the auth parameters with each command.</para>
@@ -266,7 +266,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
     /// <inheritdoc />
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
     {
-        ConnectWtWinTuner.SessionId ??= Guid.NewGuid().ToString();
+        SessionId ??= Guid.NewGuid().ToString();
         _logger?.LogInformation("Connecting to Intune using {ParameterSetName}", ParameterSetName);
         AuthenticationProvider = CreateAuthenticationProvider(cancellationToken);
 
