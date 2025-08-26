@@ -4,7 +4,7 @@ using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using System.Text;
 using WingetIntune.Graph;
-using WinTuner.Proxy.Client;
+using Svrooij.WinTuner.Proxy.Client;
 
 namespace WingetIntune.Tests.Graph;
 

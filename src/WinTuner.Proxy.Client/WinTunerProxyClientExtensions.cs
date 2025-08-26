@@ -34,7 +34,7 @@ public static class WinTunerProxyClientExtensions
                     AppVersion = appVersion,
                 }, cancellationToken: cancellationToken);
             }
-            catch (ApiException ex)
+            catch (ApiException)
             {
                 // ignore all exceptions, we just want to trigger the event
             }

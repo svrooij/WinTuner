@@ -360,35 +360,35 @@ public class WindowsSandbox
 
     }
 
-    private async Task<IEnumerable<SandboxInstalledApps>?> ParseInstalledApps(string filename, CancellationToken cancellationToken = default)
+    private Task<IEnumerable<SandboxInstalledApps>?> ParseInstalledApps(string filename, CancellationToken cancellationToken = default)
     {
         // No longer working because of Unauthorized exception in Sandbox
-        return null;
-        // the file is a csv with headers Version,Vendor,Name and uses , as separator
-        // Parse the file if it exists
-        if (!File.Exists(filename))
-        {
-            logger.LogWarning("Installed apps file not found {filename}", filename);
-            return null;
-        }
+        return Task.FromResult<IEnumerable<SandboxInstalledApps>?>(null);
+        //// the file is a csv with headers Version,Vendor,Name and uses , as separator
+        //// Parse the file if it exists
+        //if (!File.Exists(filename))
+        //{
+        //    logger.LogWarning("Installed apps file not found {filename}", filename);
+        //    return null;
+        //}
 
-        var lines = await File.ReadAllLinesAsync(filename, cancellationToken);
-        if (lines.Length < 2)
-        {
-            logger.LogWarning("Installed apps file is empty {filename}", filename);
-            return null;
-        }
+        //var lines = await File.ReadAllLinesAsync(filename, cancellationToken);
+        //if (lines.Length < 2)
+        //{
+        //    logger.LogWarning("Installed apps file is empty {filename}", filename);
+        //    return null;
+        //}
 
-        return lines.Skip(1).Select(l =>
-        {
-            var parts = l.Split(',');
-            return new SandboxInstalledApps
-            {
-                Version = parts[0].Trim('"'),
-                Vendor = parts[1].Trim('"'),
-                Name = parts[2].Trim('"')
-            };
-        });
+        //return lines.Skip(1).Select(l =>
+        //{
+        //    var parts = l.Split(',');
+        //    return new SandboxInstalledApps
+        //    {
+        //        Version = parts[0].Trim('"'),
+        //        Vendor = parts[1].Trim('"'),
+        //        Name = parts[2].Trim('"')
+        //    };
+        //});
     }
 
     public class SandboxResult
