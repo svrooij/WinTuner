@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
 using System;
 using System.IO;
 using System.Management.Automation;
@@ -18,7 +18,9 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <code>New-IntuneWinPackage -SourcePath C:\Temp\Source -SetupFile C:\Temp\Source\setup.exe -DestinationPath C:\Temp\Destination</code>
 /// </example>
 [Cmdlet(VerbsCommon.New, "IntuneWinPackage", HelpUri = "https://wintuner.app/docs/wintuner-powershell/contentprep/New-IntuneWinPackage")]
-public class NewIntuneWinPackage : DependencyCmdlet<Startup>
+[OutputType(typeof(string))]
+[GenerateBindings]
+public partial class NewIntuneWinPackage : DependencyCmdlet<Startup>
 {
     /// <summary>
     /// <para type="description">Directory containing all the installation files</para>
@@ -83,7 +85,9 @@ public class NewIntuneWinPackage : DependencyCmdlet<Startup>
             }
             _logger?.LogInformation("Creating package for {setupFile}", setupFile);
 
-            await _packager!.CreatePackage(SourcePath!, DestinationPath!, setupFile, partialPackage: PartialPackage, cancellationToken: cancellationToken);
+            var location = await _packager!.CreatePackage(SourcePath!, DestinationPath!, setupFile, partialPackage: PartialPackage, cancellationToken: cancellationToken);
+            _logger?.LogInformation("Package created at {location}", location);
+            WriteObject(location);
         }
         catch (Exception ex)
         {

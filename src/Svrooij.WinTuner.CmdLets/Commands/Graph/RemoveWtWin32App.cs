@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
@@ -21,7 +21,8 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <code>Remove-WtWin32App -AppId "1450c17d-aee5-4bef-acf9-9e0107d340f2"</code>
 /// </example>
 [Cmdlet(VerbsCommon.Remove, "WtWin32App", HelpUri = "https://wintuner.app/docs/wintuner-powershell/Remove-WtWin32App")]
-public class RemoveWtWin32App : BaseIntuneCmdlet
+[GenerateBindings]
+public partial class RemoveWtWin32App : BaseIntuneCmdlet
 {
     /// <summary>
     /// <para type="description">Id of the app in Intune</para>

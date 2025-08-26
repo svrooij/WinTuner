@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Beta.Models;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Kiota.Abstractions.Authentication;
 using WingetIntune.Graph;
 
-namespace Svrooij.WinTuner.CmdLets.Commands;
+namespace Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 /// <summary>
 /// <para type="synopsis">Update an app in Intune</para>
@@ -21,6 +21,7 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// </example>
 [Cmdlet(VerbsData.Update, "WtIntuneApp", HelpUri = "https://wintuner.app/docs/wintuner-powershell/Update-WtIntuneApp")]
 [OutputType(typeof(MobileApp))]
+[GenerateBindings]
 public class UpdateWtIntuneApp : BaseIntuneCmdlet
 {
     /// <summary>
@@ -69,7 +70,7 @@ public class UpdateWtIntuneApp : BaseIntuneCmdlet
     private ILogger<UpdateWtIntuneApp>? logger;
 
     [ServiceDependency]
-    private WingetIntune.Graph.GraphClientFactory? gcf;
+    private GraphClientFactory? gcf;
 
     /// <inheritdoc/>
     protected override async Task ProcessAuthenticatedAsync(IAuthenticationProvider provider, CancellationToken cancellationToken)
@@ -84,9 +85,9 @@ public class UpdateWtIntuneApp : BaseIntuneCmdlet
             await graphServiceClient.AddIntuneCategoriesToAppAsync(AppId!, Categories, cancellationToken);
         }
 
-        if ((AvailableFor is not null && AvailableFor.Any()) ||
-            (RequiredFor is not null && RequiredFor.Any()) ||
-            (UninstallFor is not null && UninstallFor.Any()))
+        if (AvailableFor is not null && AvailableFor.Any() ||
+            RequiredFor is not null && RequiredFor.Any() ||
+            UninstallFor is not null && UninstallFor.Any())
         {
             logger?.LogInformation("Assigning app {appId} to groups", AppId);
             await graphServiceClient.AssignAppAsync(AppId!, RequiredFor, AvailableFor, UninstallFor, EnableAutoUpdate, cancellationToken);

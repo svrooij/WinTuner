@@ -2,7 +2,7 @@
 using Microsoft.Kiota.Http.HttpClientLibrary;
 using Microsoft.Kiota.Http.HttpClientLibrary.Middleware;
 
-namespace WinTuner.Proxy.Client;
+namespace Svrooij.WinTuner.Proxy.Client;
 public static class WinTunerProxyServiceExtensions
 {
     public static IServiceCollection AddWinTunerProxyClient(this IServiceCollection services, Action<WinTunerProxyClientOptions> configure)

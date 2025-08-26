@@ -1,12 +1,15 @@
-﻿using Microsoft.Extensions.Logging;
-using Svrooij.PowerShell.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Svrooij.PowerShell.DI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
 using WingetIntune.Graph;
-using WinTuner.Proxy.Client;
+using Svrooij.WinTuner.Proxy.Client;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 
@@ -21,8 +24,9 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <code>Get-WtMobileApps | Format-table -Property Id, DisplayName, IsAssigned, OdataType</code>
 /// </example>
 [Cmdlet(VerbsCommon.Get, "WtMobileApps", HelpUri = "https://wintuner.app/docs/wintuner-powershell/Get-WtMobileApps")]
-[OutputType(typeof(Microsoft.Graph.Beta.Models.MobileApp[]))]
-public class GetWtMobileApps : BaseIntuneCmdlet
+[OutputType(typeof(Microsoft.Graph.Beta.Models.MobileApp))]
+[GenerateBindings]
+public partial class GetWtMobileApps : BaseIntuneCmdlet
 {
     /// <summary>
     /// <para type="description">Server-side filter on displayName contains.</para>
@@ -43,21 +47,23 @@ public class GetWtMobileApps : BaseIntuneCmdlet
     [Parameter(Mandatory = false, HelpMessage = "Server-side filter on filter. This is a raw OData filter expression.")]
     public string? Filter { get; set; }
 
-    [ServiceDependency]
-    private ILogger<GetWtWin32Apps>? logger;
+    [ServiceDependency(Required = true)]
+    private ILogger<GetWtWin32Apps> logger;
+
+    [ServiceDependency(Required = true)]
+    private WingetIntune.Graph.GraphClientFactory gcf;
 
     [ServiceDependency]
-    private GraphClientFactory? gcf;
+    private Svrooij.WinTuner.Proxy.Client.WinTunerProxyClient? proxyClient;
 
-    [ServiceDependency]
-    private WinTunerProxyClient? proxyClient;
+
 
     /// <inheritdoc/>
     protected override async Task ProcessAuthenticatedAsync(Microsoft.Kiota.Abstractions.Authentication.IAuthenticationProvider provider, CancellationToken cancellationToken)
     {
-        logger?.LogInformation("Getting MobileApps with name: {NameFiler}, isAssigned: {IsAssigned}", NameContains, IsAssigned);
+        logger.LogInformation("Getting MobileApps with name: {NameFiler}, isAssigned: {IsAssigned}", NameContains, IsAssigned);
 
-        var graphServiceClient = gcf!.CreateClient(provider);
+        var graphServiceClient = gcf.CreateClient(provider);
         proxyClient?.TriggerEvent(
             sessionId: ConnectWtWinTuner.SessionId,
             command: nameof(GetWtMobileApps),
@@ -88,13 +94,11 @@ public class GetWtMobileApps : BaseIntuneCmdlet
 
         if (apps is null || apps.Value?.Any() != true)
         {
-            WriteObject(new List<Microsoft.Graph.Beta.Models.MobileApp>(), true);
             return;
         }
 
         var vc = new WingetIntune.Models.StringVersionComparer();
         var result = apps.Value!.ToArray();
-        await Task.Delay(100, cancellationToken); // Sometimes PowerShell does not like it when we return too fast. "Collection was modified; enumeration operation may not execute."
-        WriteObject(result, true);
+        this.WriteCollection(result);
     }
 }

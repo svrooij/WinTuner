@@ -71,7 +71,7 @@ public partial class DefaultFileManager : IFileManager
         {
             var directory = Path.GetDirectoryName(path);
             this.CreateFolder(directory!);
-            logger.LogInformation("Downloading {url} to {path}", url, path);
+            LogDownloadingFile(url, path);
             var result = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, url), HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             if (!result.IsSuccessStatusCode && !throwOnFailure)
             {
@@ -83,7 +83,7 @@ public partial class DefaultFileManager : IFileManager
 
             if (largeFile)
             {
-                logger.LogWarning("Downloading large file {url} to {path} with size {size}MB", url, path, (result.Content.Headers.ContentLength / 1024 / 1024));
+                LogDownloadingLargeFile(url, path, (result.Content.Headers.ContentLength / 1024 / 1024));
             }
 
             using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: largeFile ? 81920 : 4096, useAsync: true))
@@ -103,10 +103,10 @@ public partial class DefaultFileManager : IFileManager
                 {
                     File.Delete(path);
                     var ex = new CryptographicException($"Hash mismatch for {url}. Expected {expectedHash} but got {hash}");
-                    logger.LogError(ex, "Hash mismatch for {url}. Expected {expectedHash} but got {hash}", url, expectedHash, hash);
+                    LogHashMismatch(ex, url, expectedHash, hash);
                     throw ex;
                 }
-                logger.LogInformation("Downloaded file {path} has hash '{hash}' as expected", url, hash);
+                LogDownloadedFileHashValid(url, hash);
             }
         }
         else if (!string.IsNullOrEmpty(expectedHash))
@@ -118,14 +118,14 @@ public partial class DefaultFileManager : IFileManager
             var hash = BitConverter.ToString(hashBytes).Replace("-", "");
             if (!hash.Equals(expectedHash, StringComparison.OrdinalIgnoreCase))
             {
-                logger.LogWarning("Previously downloaded file {path} has hash {hash} but expected {expectedHash}. Deleting file and re-downloading", path, hash, expectedHash);
+                LogHashMismatchRedownloading(path, hash, expectedHash);
                 File.Delete(path);
                 await DownloadFileAsync(url, path, expectedHash, throwOnFailure, overrideFile, cancellationToken);
             }
         }
         else
         {
-            logger.LogInformation("Skipping download of {url} to {path} because the file already exists", url, path);
+            LogSkippingDownload(url, path);
         }
     }
 
@@ -254,4 +254,22 @@ public partial class DefaultFileManager : IFileManager
 
     [LoggerMessage(EventId = 103, Level = LogLevel.Debug, Message = "Writing text to {Path}")]
     private partial void LogWritingText(string Path);
+
+    [LoggerMessage(EventId = 104, Level = LogLevel.Debug, Message = "Downloading {Url} to {Path}")]
+    private partial void LogDownloadingFile(string Url, string Path);
+
+    [LoggerMessage(EventId = 105, Level = LogLevel.Warning, Message = "Downloading large file {Url} to {Path} with size {SizeMB}MB")]
+    private partial void LogDownloadingLargeFile(string Url, string Path, long? SizeMB);
+
+    [LoggerMessage(EventId = 106, Level = LogLevel.Error, Message = "Hash mismatch for {Url}. Expected {ExpectedHash} but got {ActualHash}")]
+    private partial void LogHashMismatch(Exception ex, string Url, string ExpectedHash, string ActualHash);
+
+    [LoggerMessage(EventId = 107, Level = LogLevel.Debug, Message = "Downloaded file {Url} has hash '{Hash}' as expected")]
+    private partial void LogDownloadedFileHashValid(string Url, string Hash);
+
+    [LoggerMessage(EventId = 108, Level = LogLevel.Warning, Message = "Previously downloaded file {Path} has hash {ActualHash} but expected {ExpectedHash}. Deleting file and re-downloading")]
+    private partial void LogHashMismatchRedownloading(string Path, string ActualHash, string ExpectedHash);
+
+    [LoggerMessage(EventId = 109, Level = LogLevel.Debug, Message = "Skipping download of {Url} to {Path} because the file already exists")]
+    private partial void LogSkippingDownload(string Url, string Path);
 }

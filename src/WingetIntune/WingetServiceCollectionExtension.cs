@@ -4,7 +4,7 @@ using Microsoft.Kiota.Http.HttpClientLibrary;
 using WingetIntune.Interfaces;
 using WingetIntune.Intune;
 using WingetIntune.Testing;
-using WinTuner.Proxy.Client;
+using Svrooij.WinTuner.Proxy.Client;
 [assembly: InternalsVisibleTo("WingetIntune.Tests")]
 namespace WingetIntune;
 

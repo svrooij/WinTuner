@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WingetIntune.Testing;
 
-namespace Svrooij.WinTuner.CmdLets.Commands;
+namespace Svrooij.WinTuner.CmdLets.Commands.Testing;
 /// <summary>
 /// <para type="synopsis">Test your silent install switches</para>
 /// <para type="description">Test if a setup will install on the Windows Sandbox</para>
@@ -19,6 +19,7 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <code>Test-WtSetupFile -SetupFile D:\packages\xyz.exe -Installer "all your arguments"</code>
 /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "WtSetupFile", HelpUri = "https://wintuner.app/docs/wintuner-powershell/Test-WtSetupFile/")]
+[GenerateBindings]
 public class TestWtSetupFile : DependencyCmdlet<Startup>
 {
     [ServiceDependency]

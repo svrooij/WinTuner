@@ -9,9 +9,9 @@ public class GraphStoreAppUploader
 {
     private readonly ILogger<GraphStoreAppUploader> logger;
     private readonly IFileManager fileManager;
-    private readonly WinTuner.Proxy.Client.WinTunerProxyClient proxyClient;
+    private readonly Svrooij.WinTuner.Proxy.Client.WinTunerProxyClient proxyClient;
 
-    public GraphStoreAppUploader(ILogger<GraphStoreAppUploader> logger, IFileManager fileManager, WinTuner.Proxy.Client.WinTunerProxyClient proxyClient)
+    public GraphStoreAppUploader(ILogger<GraphStoreAppUploader> logger, IFileManager fileManager, Svrooij.WinTuner.Proxy.Client.WinTunerProxyClient proxyClient)
     {
 #if NET8_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(logger);

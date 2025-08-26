@@ -1,13 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions.Authentication;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
 using WingetIntune.Graph;
-using WinTuner.Proxy.Client;
+using Svrooij.WinTuner.Proxy.Client;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 
@@ -32,8 +33,9 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <code>$oldApps = Get-WtWin32Apps -Superseded $true\r\nforeach($app in $oldApps) { Remove-WtWin32App -AppId $app.GraphId }</code>
 /// </example>
 [Cmdlet(VerbsCommon.Get, "WtWin32Apps", HelpUri = "https://wintuner.app/docs/wintuner-powershell/Get-WtWin32Apps")]
-[OutputType(typeof(Models.WtWin32App[]))]
-public class GetWtWin32Apps : BaseIntuneCmdlet
+[OutputType(typeof(Models.WtWin32App))]
+[GenerateBindings]
+public partial class GetWtWin32Apps : BaseIntuneCmdlet
 {
     /// <summary>
     /// <para type="description">Filter based on UpdateAvailable</para>
@@ -69,22 +71,23 @@ public class GetWtWin32Apps : BaseIntuneCmdlet
     [Parameter(Mandatory = false, HelpMessage = "Server-side filter on isAssigned.")]
     public bool? IsAssigned { get; set; }
 
-    [ServiceDependency]
-    private ILogger<GetWtWin32Apps>? logger;
+    [ServiceDependency(Required = true)]
+    private ILogger<GetWtWin32Apps> logger;
 
-    [ServiceDependency]
-    private WingetIntune.Graph.GraphClientFactory? gcf;
+    [ServiceDependency(Required = true)]
+    private WingetIntune.Graph.GraphClientFactory gcf;
 
     [ServiceDependency]
     private Winget.CommunityRepository.WingetRepository? repo;
 
     [ServiceDependency]
-    private WinTunerProxyClient? proxyClient;
+    private Svrooij.WinTuner.Proxy.Client.WinTunerProxyClient? proxyClient;
 
     /// <inheritdoc/>
     protected override async Task ProcessAuthenticatedAsync(IAuthenticationProvider provider, CancellationToken cancellationToken)
     {
         logger?.LogInformation("Getting list of published apps");
+
 
         var graphServiceClient = gcf!.CreateClient(provider);
         proxyClient?.TriggerEvent(
@@ -103,12 +106,12 @@ public class GetWtWin32Apps : BaseIntuneCmdlet
                 GraphId = app.GraphId,
                 PackageId = app.PackageId,
                 Name = app.Name,
-                CurrentVersion = app.CurrentVersion,
+                CurrentVersion = app.CurrentVersion ?? "",
                 SupersededAppCount = app.SupersededAppCount,
                 SupersedingAppCount = app.SupersedingAppCount,
                 InstallerContext = app.InstallerContext,
                 Architecture = app.Architecture,
-                LatestVersion = version,
+                LatestVersion = version ?? "",
                 IsAssigned = app.IsAssigned,
             });
         }
@@ -134,7 +137,7 @@ public class GetWtWin32Apps : BaseIntuneCmdlet
         // Server side the results are alread sorted by Name, but sorting on CurrentVersion is not possible server side, so we do it here.
         var vc = new WingetIntune.Models.StringVersionComparer();
         result = result.OrderBy(x => x.Name).ThenBy(x => x.CurrentVersion, vc).ToList();
-        await Task.Delay(100, cancellationToken); // Sometimes PowerShell does not like it when we return too fast. "Collection was modified; enumeration operation may not execute."
-        WriteObject(result, true);
+
+        this.WriteCollection(result);
     }
 }

@@ -1431,10 +1431,10 @@ Connect-WtWinTuner -UseDefaultCredentials</dev:code>
     <command:returnValues>
       <command:returnValue>
         <dev:type>
-          <maml:name>Microsoft.Graph.Beta.Models.MobileApp[]</maml:name>
+          <maml:name>Microsoft.Graph.Beta.Models.MobileApp</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para>Microsoft.Graph.Beta.Models.MobileApp[]</maml:para>
+          <maml:para>Microsoft.Graph.Beta.Models.MobileApp</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
@@ -1677,10 +1677,10 @@ Connect-WtWinTuner -UseDefaultCredentials</dev:code>
     <command:returnValues>
       <command:returnValue>
         <dev:type>
-          <maml:name>Svrooij.WinTuner.CmdLets.Models.WtWin32App[]</maml:name>
+          <maml:name>Svrooij.WinTuner.CmdLets.Models.WtWin32App</maml:name>
         </dev:type>
         <maml:description>
-          <maml:para>Svrooij.WinTuner.CmdLets.Models.WtWin32App[]</maml:para>
+          <maml:para>Svrooij.WinTuner.CmdLets.Models.WtWin32App</maml:para>
         </maml:description>
       </command:returnValue>
     </command:returnValues>
@@ -1828,6 +1828,16 @@ You could run this on a weekly bases.
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
     </command:parameters>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para>System.String</maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
     <command:examples>
       <command:example>
         <maml:title>----------------------------------  Example  -----------------------------------</maml:title>

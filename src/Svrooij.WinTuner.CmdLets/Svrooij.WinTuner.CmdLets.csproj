@@ -8,22 +8,24 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Nullable>enable</Nullable>
-    <NoWarn>CS8618;CS0649</NoWarn>
+    <NoWarn>CS8618;CS0649;CS8669</NoWarn>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	<PowerShellDocsFile>Svrooij.WinTuner.CmdLets.dll-Help.xml</PowerShellDocsFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.14.2" />
-    <PackageReference Include="Svrooij.PowerShell.DependencyInjection" Version="1.1.4" />
+    <PackageReference Include="Azure.Identity" Version="1.15.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="8.0.1" />
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.11">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Svrooij.PowerShell.DI" Version="1.3.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\WingetIntune\WingetIntune.csproj" />
   </ItemGroup>
+	
 
 	<Target Name="GenerateDocumentation" AfterTargets="AfterBuild" Outputs="$(PowerShellDocsFile)" Condition="!Exists($(PowerShellDocsFile))">
 		<Message Text="Generating $(PowerShellDocsFile)" Importance="high" />

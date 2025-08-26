@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
 using System;
 using System.Management.Automation;
 using System.Threading;
@@ -8,7 +8,8 @@ using Microsoft.Kiota.Abstractions.Authentication;
 using WingetIntune.Graph;
 using GraphModels = Microsoft.Graph.Beta.Models;
 using System.Linq;
-using WinTuner.Proxy.Client;
+using Svrooij.WinTuner.Proxy.Client;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <summary>
@@ -31,7 +32,8 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// </example>
 [Cmdlet(VerbsLifecycle.Deploy, "WtMsStoreApp", DefaultParameterSetName = nameof(PackageId), HelpUri = "https://wintuner.app/docs/wintuner-powershell/Deploy-WtMsStoreApp")]
 [OutputType(typeof(GraphModels.WinGetApp))]
-public class DeployWtMsStoreApp : BaseIntuneCmdlet
+[GenerateBindings]
+public partial class DeployWtMsStoreApp : BaseIntuneCmdlet
 {
     /// <summary>
     /// <para type="description">The package id to upload to Intune.</para>
@@ -93,13 +95,13 @@ public class DeployWtMsStoreApp : BaseIntuneCmdlet
     private ILogger<DeployWtMsStoreApp>? logger;
 
     [ServiceDependency]
-    private GraphStoreAppUploader? graphStoreAppUploader;
+    private WingetIntune.Graph.GraphStoreAppUploader? graphStoreAppUploader;
 
     [ServiceDependency]
     private WingetIntune.Graph.GraphClientFactory? gcf;
 
     [ServiceDependency]
-    private WinTunerProxyClient? proxyClient;
+    private Svrooij.WinTuner.Proxy.Client.WinTunerProxyClient? proxyClient;
 
     /// <inheritdoc />
     protected override async Task ProcessAuthenticatedAsync(IAuthenticationProvider provider, CancellationToken cancellationToken)

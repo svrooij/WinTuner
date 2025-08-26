@@ -4,7 +4,7 @@ using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
 using WingetIntune;
 using WingetIntune.Msi;
 
@@ -27,6 +27,7 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// </example>
 [Cmdlet(VerbsCommon.Show, "MsiInfo", HelpUri = "https://wintuner.app/docs/wintuner-powershell/Show-MsiInfo", DefaultParameterSetName = nameof(MsiPath))]
 [OutputType(typeof(Models.MsiInfo))]
+[GenerateBindings]
 public class ShowMsiInfo : DependencyCmdlet<Startup>
 {
     /// <summary>
@@ -57,7 +58,7 @@ public class ShowMsiInfo : DependencyCmdlet<Startup>
     private ILogger<ShowMsiInfo>? logger;
 
     [ServiceDependency]
-    private IFileManager? fileManager;
+    private WingetIntune.IFileManager? fileManager;
 
     /// <inheritdoc/>
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)

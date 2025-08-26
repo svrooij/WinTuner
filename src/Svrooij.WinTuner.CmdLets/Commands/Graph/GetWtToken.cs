@@ -5,7 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions.Authentication;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 
@@ -21,7 +22,8 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// </example>
 [Cmdlet(VerbsCommon.Get, "WtToken", HelpUri = "https://wintuner.app/docs/wintuner-powershell/Get-WtToken")]
 [OutputType(typeof(string))]
-public class GetWtToken : BaseIntuneCmdlet
+[GenerateBindings]
+public partial class GetWtToken : BaseIntuneCmdlet
 {
     /// <summary>
     /// Decode the token

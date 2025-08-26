@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Svrooij.PowerShell.DependencyInjection;
-using Svrooij.PowerShell.DependencyInjection.Logging;
+using Svrooij.PowerShell.DI;
+using Svrooij.PowerShell.DI.Logging;
 using System;
 using WingetIntune;
 
@@ -24,8 +24,9 @@ public class Startup : PsStartup
     {
         return builder =>
         {
-            builder.DefaultLevel = LogLevel.Information;
+            builder.DefaultLevel = LogLevel.Debug;
             builder.LogLevel.Add("System.Net.Http.HttpClient", LogLevel.Warning);
+            builder.LogLevel.Add("System.Net.Http.HttpClient.GraphClientFactory.LogicalHandler", LogLevel.Warning);
             builder.IncludeCategory = true;
             builder.StripNamespace = true;
         };

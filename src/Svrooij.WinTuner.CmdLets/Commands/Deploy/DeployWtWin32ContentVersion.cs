@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
 using System;
 using System.IO;
 using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Kiota.Abstractions.Authentication;
-using WingetIntune.Graph;
-using WinTuner.Proxy.Client;
+using Svrooij.WinTuner.Proxy.Client;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <summary>
@@ -26,7 +26,8 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// </example>
 [Cmdlet(VerbsLifecycle.Deploy, "WtWin32ContentVersion", DefaultParameterSetName = nameof(IntuneWinFile), HelpUri = "https://wintuner.app/docs/wintuner-powershell/Deploy-WtWin32ContentVersion")]
 [OutputType(typeof(string))]
-public class DeployWtWin32ContentVersion : BaseIntuneCmdlet
+[GenerateBindings]
+public partial class DeployWtWin32ContentVersion : BaseIntuneCmdlet
 {
 
     /// <summary>
@@ -52,13 +53,13 @@ public class DeployWtWin32ContentVersion : BaseIntuneCmdlet
     private ILogger<DeployWtWin32App>? logger;
 
     [ServiceDependency]
-    private GraphAppUploader? graphAppUploader;
+    private WingetIntune.Graph.GraphAppUploader? graphAppUploader;
 
     [ServiceDependency]
-    private GraphClientFactory? gcf;
+    private WingetIntune.Graph.GraphClientFactory? gcf;
 
     [ServiceDependency]
-    private WinTunerProxyClient? winTunerProxyClient;
+    private Svrooij.WinTuner.Proxy.Client.WinTunerProxyClient? winTunerProxyClient;
 
     private bool isPartialPackage;
     private string? metadataFilename;

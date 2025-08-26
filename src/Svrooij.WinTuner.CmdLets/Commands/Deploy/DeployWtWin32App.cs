@@ -1,19 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Beta;
-using Svrooij.PowerShell.DependencyInjection;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Svrooij.PowerShell.DI;
 using System;
 using System.IO;
+using System.Linq;
 using System.Management.Automation;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Kiota.Abstractions.Authentication;
-using WingetIntune.Graph;
-using WingetIntune.Intune;
-using GraphModels = Microsoft.Graph.Beta.Models;
-using System.Linq;
-using WinTuner.Proxy.Client;
 using WingetIntune.Extensions;
+using WingetIntune.Graph;
+using Svrooij.WinTuner.Proxy.Client;
+using GraphModels = Microsoft.Graph.Beta.Models;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <summary>
@@ -45,7 +44,8 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// </example>
 [Cmdlet(VerbsLifecycle.Deploy, "WtWin32App", DefaultParameterSetName = ParameterSetWinGet, HelpUri = "https://wintuner.app/docs/wintuner-powershell/Deploy-WtWin32App")]
 [OutputType(typeof(GraphModels.Win32LobApp))]
-public class DeployWtWin32App : BaseIntuneCmdlet
+[GenerateBindings]
+public partial class DeployWtWin32App : BaseIntuneCmdlet
 {
     private const string ParameterSetApp = "Win32LobApp";
     private const string ParameterSetWinGet = "WinGet";
@@ -193,16 +193,16 @@ public class DeployWtWin32App : BaseIntuneCmdlet
     private ILogger<DeployWtWin32App>? logger;
 
     [ServiceDependency]
-    private GraphAppUploader? graphAppUploader;
+    private WingetIntune.Graph.GraphAppUploader? graphAppUploader;
 
     [ServiceDependency]
-    private MetadataManager? metadataManager;
+    private WingetIntune.Intune.MetadataManager? metadataManager;
 
     [ServiceDependency]
     private WingetIntune.Graph.GraphClientFactory? gcf;
 
     [ServiceDependency]
-    private WinTunerProxyClient? proxyClient;
+    private Svrooij.WinTuner.Proxy.Client.WinTunerProxyClient? proxyClient;
 
     private bool isPartialPackage;
     private string? metadataFilename;

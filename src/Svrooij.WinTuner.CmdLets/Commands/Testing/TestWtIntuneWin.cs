@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Svrooij.PowerShell.DependencyInjection;
+using Svrooij.PowerShell.DI;
 using System;
 using System.IO;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using WingetIntune.Intune;
 using WingetIntune.Testing;
 
-namespace Svrooij.WinTuner.CmdLets.Commands;
+namespace Svrooij.WinTuner.CmdLets.Commands.Testing;
 /// <summary>
 /// <para type="synopsis">Test if a package will install</para>
 /// <para type="description">Use the Windows Sandbox to test if the provided installer arguments will make it install silently and if it exists with the expected exit code.</para>
@@ -21,6 +21,7 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <code>Test-WtIntuneWin -PackageFolder &quot;D:\packages\JanDeDobbeleer.OhMyPosh\22.0.3&quot;</code>
 /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "WtIntuneWin", DefaultParameterSetName = nameof(PackageFolder), HelpUri = "https://wintuner.app/docs/wintuner-powershell/Test-WtIntuneWin/")]
+[GenerateBindings]
 public class TestWtIntuneWin : DependencyCmdlet<Startup>
 {
     private const string ParameterSetWinGet = "WinGet";

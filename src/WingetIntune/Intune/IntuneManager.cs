@@ -321,7 +321,7 @@ public partial class IntuneManager
         }
 
         var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        logger.LogDebug("Extracting intunewin file {File} to {TempFolder}", intuneFilePath, tempFolder);
+        LogExtractingIntuneWinFile(intuneFilePath, tempFolder);
         await fileManager.ExtractFileToFolderAsync(intuneFilePath, tempFolder, cancellationToken);
 
         var info = IntuneMetadata.GetApplicationInfo(await fileManager.ReadAllBytesAsync(IntuneMetadata.GetMetadataPath(tempFolder), cancellationToken))!;
@@ -329,7 +329,7 @@ public partial class IntuneManager
 
         var contentVersion = await graphServiceClient.Intune_CreateWin32LobAppContentVersionAsync(appId, cancellationToken);
 
-        logger.LogDebug("Created content version {Id}", contentVersion!.Id);
+        LogCreatedContentVersion(contentVersion!.Id!);
 
         var mobileAppContentFileRequest = new MobileAppContentFile
         {
@@ -340,11 +340,11 @@ public partial class IntuneManager
             Manifest = null,
         };
 
-        logger.LogDebug("Creating content file {Name} {Size} {SizeEncrypted}", mobileAppContentFileRequest.Name, mobileAppContentFileRequest.Size, mobileAppContentFileRequest.SizeEncrypted);
+        LogCreatingContentFile(mobileAppContentFileRequest.Name!, mobileAppContentFileRequest.Size!.Value, mobileAppContentFileRequest.SizeEncrypted!.Value);
 
         var mobileAppContentFile = await graphServiceClient.Intune_CreateWin32LobAppContentVersionFileAsync(appId, contentVersion.Id!, mobileAppContentFileRequest, cancellationToken);
 
-        logger.LogDebug("Created content file {Id}", mobileAppContentFile?.Id);
+        LogCreatedContentFile(mobileAppContentFile!.Id!);
         // Wait for a bit (it's generating the azure storage uri)
         await Task.Delay(3000, cancellationToken);
 
@@ -353,21 +353,24 @@ public partial class IntuneManager
             mobileAppContentFile!.Id!,
             cancellationToken);
 
-        logger.LogDebug("Loaded content file {Id} {BlobUri}", updatedMobileAppContentFile?.Id, updatedMobileAppContentFile?.AzureStorageUri);
+        LogLoadedContentFile(updatedMobileAppContentFile!.Id!, updatedMobileAppContentFile.AzureStorageUri!);
 
         await azureFileUploader.UploadFileToAzureAsync(
             IntuneMetadata.GetContentsPath(tempFolder),
             new Uri(updatedMobileAppContentFile!.AzureStorageUri!),
             cancellationToken);
 
-        logger.LogDebug("Uploaded content file {Id} {BlobUri}", updatedMobileAppContentFile.Id, updatedMobileAppContentFile.AzureStorageUri);
+        LogUploadedContentFile(updatedMobileAppContentFile.Id!, updatedMobileAppContentFile.AzureStorageUri!);
         fileManager.DeleteFileOrFolder(tempFolder);
 
         await Task.Delay(5000, cancellationToken);
 
         var encryptionInfo = mapper.ToFileEncryptionInfo(info.EncryptionInfo);
 
-        logger.LogDebug("Mapped encryption info {EncryptionInfo}", JsonSerializer.Serialize(encryptionInfo));
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            LogMappedEncryptionInfo(JsonSerializer.Serialize(encryptionInfo));
+        }
 
         // Commit the file
         await graphServiceClient.Intune_CommitWin32LobAppContentVersionFileAsync(appId,
@@ -376,11 +379,11 @@ public partial class IntuneManager
             encryptionInfo,
             cancellationToken);
 
-        logger.LogDebug("Committed content file {Id}", mobileAppContentFile.Id);
+        LogCommittedContentFile(mobileAppContentFile.Id!);
 
         MobileAppContentFile? commitedFile = await graphServiceClient.Intune_WaitForFinalCommitStateAsync(appId, contentVersion!.Id!, mobileAppContentFile!.Id!, cancellationToken);
 
-        logger.LogInformation("Added content version {ContentVersionId} to app {AppId}", contentVersion.Id, appId);
+        LogAddedContentVersion(contentVersion.Id!, appId);
         return contentVersion.Id!;
     }
 
@@ -425,12 +428,12 @@ public partial class IntuneManager
         }
         catch (ODataError ex)
         {
-            logger.LogError(ex, "Error publishing app {Message}", ex.Error?.Message);
+            LogErrorPublishingApp(ex, ex.Error?.Message ?? "Unknown OData error");
             throw;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error publishing app");
+            LogErrorPublishingAppGeneral(ex);
             throw;
         }
     }
@@ -442,7 +445,7 @@ public partial class IntuneManager
         ArgumentException.ThrowIfNullOrEmpty(appId);
         ArgumentNullException.ThrowIfNull(categories);
 #endif
-        logger.LogInformation("Adding categories {Categories} to app {AppId}", string.Join(",", categories), appId);
+        LogAddingCategories(string.Join(",", categories), appId);
 
         try
         {
@@ -450,7 +453,7 @@ public partial class IntuneManager
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error adding categories to app");
+            LogErrorAddingCategories(ex);
             // Don't throw, just continue.
             //throw;
         }
@@ -466,11 +469,11 @@ public partial class IntuneManager
         try
         {
             var assignments = await GraphWorkflows.AssignAppAsync(graphServiceClient, appId, requiredFor, availableFor, uninstallFor, addAutoUpdateSetting, cancellationToken);
-            logger.LogInformation("Assigned app {AppId} to {AssignmentCount} assignments", appId, assignments);
+            LogAssignedApp(appId, assignments);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error assigning app to groups");
+            LogErrorAssigningApp(ex);
             // Don't throw, just continue.
             //throw;
         }
@@ -487,7 +490,7 @@ public partial class IntuneManager
         }
         catch (Exception e)
         {
-            logger.LogWarning(e, "Error downloading logo for {PackageId}, place your own logo here: {LogoPath}", packageId, logoPath);
+            LogErrorDownloadingLogo(e, packageId, logoPath);
         }
 
     }
@@ -545,7 +548,7 @@ public partial class IntuneManager
         var sb = new StringBuilder();
         if (packageInfo.InstallerType.IsMsi() || !string.IsNullOrEmpty(packageInfo.MsiProductCode))
         {
-            logger.LogInformation("Writing detection info with msi details {PackageId} {ProductCode}", packageInfo.PackageIdentifier, packageInfo.MsiProductCode!);
+            LogWritingDetectionInfo(packageInfo.PackageIdentifier!, packageInfo.MsiProductCode!);
 
             sb.AppendFormat("Package {0} {1} from {2}\r\n", packageInfo.PackageIdentifier, packageInfo.Version, packageInfo.Source);
             sb.AppendLine();
@@ -557,7 +560,7 @@ public partial class IntuneManager
             sb.Clear();
         }
 
-        logger.LogInformation("Writing package readme for package {PackageId}", packageInfo.PackageIdentifier);
+        LogWritingPackageReadme(packageInfo.PackageIdentifier!);
         sb.AppendFormat("Package {0} {1} from {2}\r\n", packageInfo.PackageIdentifier, packageInfo.Version, packageInfo.Source);
         sb.AppendLine();
         sb.AppendFormat("Display name: {0}\r\n", packageInfo.DisplayName);
@@ -617,7 +620,7 @@ public partial class IntuneManager
         }
         else
         {
-            logger.LogWarning("No logo found for {PackageId}, place your image at {LogoPath}", packageInfo.PackageIdentifier, Path.GetFullPath(logoPath));
+            LogNoLogoFound(packageInfo.PackageIdentifier!, Path.GetFullPath(logoPath));
         }
 
         using var stream = new MemoryStream();
@@ -646,18 +649,76 @@ public partial class IntuneManager
         return new GraphServiceClient(httpClient, provider, "https://graph.microsoft.com/beta");
     }
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Generating IntuneWin package for {PackageId} {Version} {Architecture} {Context} in {OutputFolder}")]
+    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "Generating IntuneWin package for {PackageId} {Version} {Architecture} {Context} in {OutputFolder}")]
     private partial void LogGeneratePackage(string PackageId, string Version, Architecture? Architecture, InstallerContext? Context, string OutputFolder);
 
     [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Downloading content prep tool from {ContentPrepUri}")]
     private partial void LogDownloadContentPrepTool(Uri ContentPrepUri);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Downloading installer from {InstallerUri} to {Path}")]
+    [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "Downloading installer from {InstallerUri} to {Path}")]
     private partial void LogDownloadInstaller(Uri InstallerUri, string Path);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Generating IntuneWin package from {TempPackageFolder} to {OutputFolder} with {InstallerFilename}")]
+    [LoggerMessage(EventId = 5, Level = LogLevel.Debug, Message = "Generating IntuneWin package from {TempPackageFolder} to {OutputFolder} with {InstallerFilename}")]
     private partial void LogGenerateIntuneWinFile(string TempPackageFolder, string OutputFolder, string InstallerFilename);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "Downloading logo from {LogoUri}")]
+    [LoggerMessage(EventId = 6, Level = LogLevel.Debug, Message = "Downloading logo from {LogoUri}")]
     private partial void LogDownloadLogo(string LogoUri);
+
+    [LoggerMessage(EventId = 7, Level = LogLevel.Debug, Message = "Extracting intunewin file {File} to {TempFolder}")]
+    private partial void LogExtractingIntuneWinFile(string File, string TempFolder);
+
+    [LoggerMessage(EventId = 8, Level = LogLevel.Debug, Message = "Created content version {Id}")]
+    private partial void LogCreatedContentVersion(string Id);
+
+    [LoggerMessage(EventId = 9, Level = LogLevel.Debug, Message = "Creating content file {Name} {Size} {SizeEncrypted}")]
+    private partial void LogCreatingContentFile(string Name, long Size, long SizeEncrypted);
+
+    [LoggerMessage(EventId = 10, Level = LogLevel.Debug, Message = "Created content file {Id}")]
+    private partial void LogCreatedContentFile(string Id);
+
+    [LoggerMessage(EventId = 11, Level = LogLevel.Debug, Message = "Loaded content file {Id} {BlobUri}")]
+    private partial void LogLoadedContentFile(string Id, string BlobUri);
+
+    [LoggerMessage(EventId = 12, Level = LogLevel.Debug, Message = "Uploaded content file {Id} {BlobUri}")]
+    private partial void LogUploadedContentFile(string Id, string BlobUri);
+
+    // Using serialization here, so IsEnabled is already checked.
+    [LoggerMessage(EventId = 13, Level = LogLevel.Debug, Message = "Mapped encryption info {EncryptionInfo}", SkipEnabledCheck = true)]
+    private partial void LogMappedEncryptionInfo(string EncryptionInfo);
+
+    [LoggerMessage(EventId = 14, Level = LogLevel.Debug, Message = "Committed content file {Id}")]
+    private partial void LogCommittedContentFile(string Id);
+
+    [LoggerMessage(EventId = 15, Level = LogLevel.Information, Message = "Added content version {ContentVersionId} to app {AppId}")]
+    private partial void LogAddedContentVersion(string ContentVersionId, string AppId);
+
+    [LoggerMessage(EventId = 16, Level = LogLevel.Error, Message = "Error publishing app {Message}")]
+    private partial void LogErrorPublishingApp(Exception ex, string Message);
+
+    [LoggerMessage(EventId = 17, Level = LogLevel.Error, Message = "Error publishing app")]
+    private partial void LogErrorPublishingAppGeneral(Exception ex);
+
+    [LoggerMessage(EventId = 18, Level = LogLevel.Debug, Message = "Adding categories {Categories} to app {AppId}")]
+    private partial void LogAddingCategories(string Categories, string AppId);
+
+    [LoggerMessage(EventId = 19, Level = LogLevel.Error, Message = "Error adding categories to app")]
+    private partial void LogErrorAddingCategories(Exception ex);
+
+    [LoggerMessage(EventId = 20, Level = LogLevel.Debug, Message = "Assigned app {AppId} to {AssignmentCount} assignments")]
+    private partial void LogAssignedApp(string AppId, int AssignmentCount);
+
+    [LoggerMessage(EventId = 21, Level = LogLevel.Error, Message = "Error assigning app to groups")]
+    private partial void LogErrorAssigningApp(Exception ex);
+
+    [LoggerMessage(EventId = 22, Level = LogLevel.Warning, Message = "Error downloading logo for {PackageId}, place your own logo here: {LogoPath}")]
+    private partial void LogErrorDownloadingLogo(Exception ex, string PackageId, string LogoPath);
+
+    [LoggerMessage(EventId = 23, Level = LogLevel.Debug, Message = "Writing detection info with msi details {PackageId} {ProductCode}")]
+    private partial void LogWritingDetectionInfo(string PackageId, string ProductCode);
+
+    [LoggerMessage(EventId = 24, Level = LogLevel.Debug, Message = "Writing package readme for package {PackageId}")]
+    private partial void LogWritingPackageReadme(string PackageId);
+
+    [LoggerMessage(EventId = 25, Level = LogLevel.Warning, Message = "No logo found for {PackageId}, place your image at {LogoPath}")]
+    private partial void LogNoLogoFound(string PackageId, string LogoPath);
 }
