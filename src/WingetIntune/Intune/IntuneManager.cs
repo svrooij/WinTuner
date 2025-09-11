@@ -541,7 +541,7 @@ public partial class IntuneManager
         packageInfo.UninstallCommandLine = $"msiexec /x {packageInfo.MsiProductCode} /qn /norestart";
     }
 
-    private static readonly InstallerType[] SupportedInstallers = new[] { InstallerType.Inno, InstallerType.Msi, InstallerType.Burn, InstallerType.Wix, InstallerType.Nullsoft, InstallerType.Exe };
+    private static readonly InstallerType[] SupportedInstallers = new[] { InstallerType.Inno, InstallerType.Msi, InstallerType.Msix, InstallerType.Burn, InstallerType.Wix, InstallerType.Nullsoft, InstallerType.Exe };
 
     private async Task WriteReadmeAsync(string packageFolder, PackageInfo packageInfo, CancellationToken cancellationToken)
     {

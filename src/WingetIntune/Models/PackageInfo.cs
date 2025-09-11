@@ -36,6 +36,8 @@ public class PackageInfo
         if (Installers is null) { return null; }
         return Installers.SingleOrDefault(installerType, architecture, context, locale)
             ?? Installers.SingleOrDefault(installerType, architecture, Models.InstallerContext.Unknown, locale)
+            ?? Installers.SingleOrDefault(Models.InstallerType.Msix, architecture, context, locale)
+            ?? Installers.SingleOrDefault(Models.InstallerType.Msix, architecture, Models.InstallerContext.Unknown, locale)
             ?? Installers.SingleOrDefault(Models.InstallerType.Wix, architecture, context, locale)
             ?? Installers.SingleOrDefault(Models.InstallerType.Wix, architecture, Models.InstallerContext.Unknown, locale)
             ?? Installers.SingleOrDefault(Models.InstallerType.Unknown, architecture, context, locale)
