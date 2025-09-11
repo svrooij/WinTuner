@@ -41,13 +41,12 @@ public partial class ComputeBestInstallerForPackageCommand
         package.InstallerContext = installer.ParseInstallerContext() == InstallerContext.Unknown ? (package.InstallerContext ?? packageOptions.InstallerContext) : installer.ParseInstallerContext();
         package.InstallerType = installer.ParseInstallerType();
         package.Installer = installer;
+        package.MsiVersion ??= installer.AppsAndFeaturesEntries?.FirstOrDefault()?.DisplayVersion;
+        package.MsiProductCode ??= installer.ProductCode ?? installer.AppsAndFeaturesEntries?.FirstOrDefault()?.ProductCode;
         if (!package.InstallerType.IsMsi() || packageOptions.PackageScript)
         {
             ComputeInstallerCommands(ref package, packageOptions);
         }
-
-        package.MsiVersion ??= installer.AppsAndFeaturesEntries?.FirstOrDefault()?.DisplayVersion;
-        package.MsiProductCode ??= installer.ProductCode ?? installer.AppsAndFeaturesEntries?.FirstOrDefault()?.ProductCode;
     }
 
     private static string GuessInstallerExtension(InstallerType installerType) => installerType switch
@@ -117,6 +116,12 @@ public partial class ComputeBestInstallerForPackageCommand
                     package.InstallCommandLine = $"\"{package.InstallerFilename}\" {installerSwitches}";
                     // Have to check the uninstall command
                     //package.UninstallCommandLine = $"\"{package.InstallerFilename}\" /quiet /norestart /uninstall /passive"; // /burn.ignoredependencies=\"{package.PackageIdentifier}\"
+                    break;
+
+                case InstallerType.Msix:
+                    package.InstallCommandLine = $"Add-AppxPackage -Path \"{package.InstallerFilename}\" -Confirm -StubPackageOption InstallFull";
+                    if (package.MsiProductCode is not null)
+                        package.UninstallCommandLine = $"Remove-AppxPackage -Package \"{package.MsiProductCode}\" -Confirm";
                     break;
             }
         }
