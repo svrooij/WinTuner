@@ -3,14 +3,14 @@
 # Script parameters in `{parameter_name}`
 # packageId - The package id of the application to be detected
 # action - The action to be performed (install, uninstall, upgrade) used for Transcript name
-# command - The command to be executed, e.g. $(Get-WingetCmd) install --id {packageId} --exact
 # success - The string to look for in the output to determine success
 # message - The message to be displayed on success
+# The command is below the function, because it can contain calls to the function, and powershell does not like it otherwise
+# command - The command to be executed, e.g. $(Get-WingetCmd) install --id {packageId} --exact
 
 # --------------------------- Start parameters -------------------------------
 $packageId = "{packageId}"
 $action = "{action}"
-$command = {command}
 $success = "{success}"
 $message = "{message}"
 # --------------------------- End parameters ---------------------------------
@@ -42,8 +42,8 @@ Function Get-WingetCmd {
     Write-Host "Winget location: $WingetCmd"
     return $WingetCmd
 }
-
-$procOutput = & $command
+# Command parameter can contain calls to the function, so it must be after the function, the ampersand makes powershell execute the code
+$procOutput = & {command}
 if($procOutput -is [array]) {
     $lastRow = $procOutput[$wingetOutput.Length -1]
     if ($lastRow.Contains($success)) {
