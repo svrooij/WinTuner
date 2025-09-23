@@ -4,13 +4,13 @@
     "net8.0": {
       "Azure.Identity": {
         "type": "Direct",
-        "requested": "[1.15.0, )",
-        "resolved": "1.15.0",
-        "contentHash": "tvJVy5s8VdsAYHIcBw1KrwDTcTWr2K5fG5o/xEJ2zU3+QUViDx/utut83+fGoB/bcBspxuC6wG650GwAUkU2UQ==",
+        "requested": "[1.16.0, )",
+        "resolved": "1.16.0",
+        "contentHash": "ZTtJt9N1hW9S7JRt05aBy894mp9uK4KbfcVcg2OndKbph/6RCcDEisdBV9iNHiNDSXXQRR52SAYy8RhknQ1xEA==",
         "dependencies": {
-          "Azure.Core": "1.47.1",
-          "Microsoft.Identity.Client": "4.73.1",
-          "Microsoft.Identity.Client.Extensions.Msal": "4.73.1"
+          "Azure.Core": "1.47.3",
+          "Microsoft.Identity.Client": "4.76.0",
+          "Microsoft.Identity.Client.Extensions.Msal": "4.76.0"
         }
       },
       "Microsoft.Extensions.Logging.Configuration": {
@@ -65,9 +65,9 @@
       },
       "Svrooij.PowerShell.DI": {
         "type": "Direct",
-        "requested": "[1.3.2, )",
-        "resolved": "1.3.2",
-        "contentHash": "LFk/eTN+aKNvbWZko94tgWf7J+mDl4LOJ36Ziu3nDECW4Zy0EGTpqZQ8v59rYPsRwBTgjLkWFiO7oOoz/6DHSA=="
+        "requested": "[1.3.4, )",
+        "resolved": "1.3.4",
+        "contentHash": "1j6jQyAJ+H3eBkZi2uBZH0AfUiQcVkrUKd7TCqoLpq47HgnHeztCYUtCkGwjpmi8qIPMOf3RaRL8M1MflcvzGQ=="
       },
       "Azure.Core": {
         "type": "Transitive",
@@ -303,28 +303,28 @@
       },
       "Microsoft.Identity.Client": {
         "type": "Transitive",
-        "resolved": "4.76.0",
-        "contentHash": "j2FtmljuCveDJ7umBVYm6Bx3iVGA71U07Dc7byGr2Hrj7XlByZSknruCBUeYN3V75nn1VEhXegxE0MerxvxrXQ==",
+        "resolved": "4.77.0",
+        "contentHash": "VV4ymvWZ140P7ehNsMLCOWsRYUwMOOFs0Uu6Y0wj1ItyLo0OsMdHh1x8pgisuHsNEEOzQdt2CNzrAwxqiL2wUA==",
         "dependencies": {
-          "Microsoft.IdentityModel.Abstractions": "6.35.0",
+          "Microsoft.IdentityModel.Abstractions": "8.14.0",
           "System.Diagnostics.DiagnosticSource": "6.0.1"
         }
       },
       "Microsoft.Identity.Client.Broker": {
         "type": "Transitive",
-        "resolved": "4.76.0",
-        "contentHash": "dJEbSPSNm8L/e+QSvTFUKkspUk3YVaJF97VB0RpxIUAs3h8/QAXbVVGjNyVwoU7UV43e4+xrMJOXOuQ089+RAg==",
+        "resolved": "4.77.0",
+        "contentHash": "9QHafFw38usFLYBJA0NwS7S8rJMHascdrJP/j1nEyxBseXd4XvE0NBrScp/WhLHADYlzRHsuzvVJWaf+T/hSQA==",
         "dependencies": {
-          "Microsoft.Identity.Client": "4.76.0",
+          "Microsoft.Identity.Client": "4.77.0",
           "Microsoft.Identity.Client.NativeInterop": "0.19.4"
         }
       },
       "Microsoft.Identity.Client.Extensions.Msal": {
         "type": "Transitive",
-        "resolved": "4.76.0",
-        "contentHash": "D0n3yMTa3gnDh1usrJmyxGWKYeqbQNCWLgQ0Tswf7S6nk9YobiCOX+M2V8EX5SPqkZxpwkTT6odAhaafu3TIeA==",
+        "resolved": "4.77.0",
+        "contentHash": "GmDx12eia11gvJ0fPmntPXnZe+4NPkfaS5dVX4uaTsilQRdV2l1bxBi8wV5p9TQRZ0/5+bKLOAE9iLl0Y3pemw==",
         "dependencies": {
-          "Microsoft.Identity.Client": "4.76.0",
+          "Microsoft.Identity.Client": "4.77.0",
           "System.Security.Cryptography.ProtectedData": "4.5.0"
         }
       },
@@ -335,8 +335,8 @@
       },
       "Microsoft.IdentityModel.Abstractions": {
         "type": "Transitive",
-        "resolved": "8.6.1",
-        "contentHash": "OwmvCXYTttrxV3qT7QKDkoQP4/DB4RWjTwEqV+dNfb2opHn29WGDzoF+r4BVFQVy+BDYMhRlhIp8g3jSyJd+4Q=="
+        "resolved": "8.14.0",
+        "contentHash": "iwbCpSjD3ehfTwBhtSNEtKPK0ICun6ov7Ibx6ISNA9bfwIyzI2Siwyi9eJFCJBwxowK9xcA1mj+jBWiigeqgcQ=="
       },
       "Microsoft.IdentityModel.JsonWebTokens": {
         "type": "Transitive",
@@ -1087,8 +1087,8 @@
           "Microsoft.Extensions.Logging.Abstractions": "[8.0.3, )",
           "Microsoft.Extensions.Options": "[8.0.2, )",
           "Microsoft.Graph.Beta": "[5.120.0-preview, )",
-          "Microsoft.Identity.Client.Broker": "[4.76.0, )",
-          "Microsoft.Identity.Client.Extensions.Msal": "[4.76.0, )",
+          "Microsoft.Identity.Client.Broker": "[4.77.0, )",
+          "Microsoft.Identity.Client.Extensions.Msal": "[4.77.0, )",
           "Microsoft.Kiota.Authentication.Azure": "[1.19.1, )",
           "OpenMcdf": "[2.3.1, 2.3.1]",
           "Riok.Mapperly": "[3.6.0, )",

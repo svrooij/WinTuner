@@ -22,7 +22,7 @@ namespace Svrooij.WinTuner.CmdLets.Commands.Graph;
 [Cmdlet(VerbsData.Update, "WtIntuneApp", HelpUri = "https://wintuner.app/docs/wintuner-powershell/Update-WtIntuneApp")]
 [OutputType(typeof(MobileApp))]
 [GenerateBindings]
-public class UpdateWtIntuneApp : BaseIntuneCmdlet
+public partial class UpdateWtIntuneApp : BaseIntuneCmdlet
 {
     /// <summary>
     /// <para type="description">Id of the app in Intune</para>
@@ -70,7 +70,7 @@ public class UpdateWtIntuneApp : BaseIntuneCmdlet
     private ILogger<UpdateWtIntuneApp>? logger;
 
     [ServiceDependency]
-    private GraphClientFactory? gcf;
+    private WingetIntune.Graph.GraphClientFactory? gcf;
 
     /// <inheritdoc/>
     protected override async Task ProcessAuthenticatedAsync(IAuthenticationProvider provider, CancellationToken cancellationToken)
