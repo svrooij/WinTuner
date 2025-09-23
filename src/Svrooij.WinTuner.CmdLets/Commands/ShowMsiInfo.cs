@@ -28,7 +28,7 @@ namespace Svrooij.WinTuner.CmdLets.Commands;
 [Cmdlet(VerbsCommon.Show, "MsiInfo", HelpUri = "https://wintuner.app/docs/wintuner-powershell/Show-MsiInfo", DefaultParameterSetName = nameof(MsiPath))]
 [OutputType(typeof(Models.MsiInfo))]
 [GenerateBindings]
-public class ShowMsiInfo : DependencyCmdlet<Startup>
+public partial class ShowMsiInfo : DependencyCmdlet<Startup>
 {
     /// <summary>
     /// <para type="description">Path to the MSI file</para>

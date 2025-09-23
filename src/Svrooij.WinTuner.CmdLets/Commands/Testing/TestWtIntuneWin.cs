@@ -21,7 +21,6 @@ namespace Svrooij.WinTuner.CmdLets.Commands.Testing;
 /// <code>Test-WtIntuneWin -PackageFolder &quot;D:\packages\JanDeDobbeleer.OhMyPosh\22.0.3&quot;</code>
 /// </example>
 [Cmdlet(VerbsDiagnostic.Test, "WtIntuneWin", DefaultParameterSetName = nameof(PackageFolder), HelpUri = "https://wintuner.app/docs/wintuner-powershell/Test-WtIntuneWin/")]
-[GenerateBindings]
 public class TestWtIntuneWin : DependencyCmdlet<Startup>
 {
     private const string ParameterSetWinGet = "WinGet";
