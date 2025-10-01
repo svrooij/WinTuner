@@ -153,7 +153,8 @@ public partial class WingetManager : IWingetRepository
     {
         var sanitizedId = id.Replace("+", "%2B");
         var idParts = sanitizedId.Split('.');
-        return $"https://github.com/microsoft/winget-pkgs/raw/master/manifests/{id[0].ToString().ToLower()}/{string.Join("/", idParts)}/{version}/{sanitizedId}{addition}.yaml";
+        var encodedVersion = Uri.EscapeDataString(version).Replace("+", "%2B");
+        return $"https://github.com/microsoft/winget-pkgs/raw/master/manifests/{id[0].ToString().ToLower()}/{string.Join("/", idParts)}/{encodedVersion}/{sanitizedId}{addition}.yaml";
     }
 
     private static Exception CreateExceptionForFailedProcess(ProcessResult? processResult)
