@@ -63,7 +63,8 @@ public class WindowsSandbox
         installerFilename ??= info!.SetupFile!;
         if (!File.Exists(Path.Combine(installerFolder, installerFilename)))
         {
-            throw new FileNotFoundException("Installer in the unpacked folder", installerFilename!);
+            var ex = new FileNotFoundException("Installer not in the unpacked folder", installerFilename!);
+            logger.LogCritical(ex, "Installer {InstallerFile} not found in package", installerFilename);
         }
         await PrepareSandboxDependencies(cancellationToken: cancellationToken);
         var sandboxFile = Path.Combine(outputFolder, "sandbox.wsb");
@@ -310,7 +311,7 @@ public class WindowsSandbox
     /// <param name="cleanup">Should we try to cleanup the folder containing the sandbox file?</param>
     /// <param name="cancellationToken">In case you want to cancel the process.</param>
     /// <returns></returns>
-    public async Task<SandboxResult?> RunSandbox(string sandboxFile, bool cleanup, CancellationToken cancellationToken)
+    public async Task<SandboxResult?> RunSandbox(string sandboxFile, bool cleanup, Action waitForConfirm, CancellationToken cancellationToken)
     {
         logger.LogInformation("Running sandbox {SsandboxFile}", sandboxFile);
         var processResult = await processManager.RunProcessAsync("WindowsSandbox.exe", sandboxFile, cancellationToken);
@@ -324,7 +325,9 @@ public class WindowsSandbox
         }
 
         logger.LogInformation("Press enter when you closed the sandbox");
-        Console.ReadLine();
+
+        waitForConfirm();
+        //Console.ReadLine();
         //try
         //{
         //    await Task.Delay(600_000, cancellationToken);

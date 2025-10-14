@@ -60,7 +60,7 @@ public class TestWtSetupFile : DependencyCmdlet<Startup>
     {
         var sandboxFile = await sandbox!.PrepareSandboxForInstaller(SetupFile!, InstallerArguments, Sleep, cancellationToken);
         logger?.LogDebug("Sandbox file created at {SandboxFile}", sandboxFile);
-        var result = await sandbox.RunSandbox(sandboxFile, true, cancellationToken);
+        var result = await sandbox.RunSandbox(sandboxFile, true, () => { this.Host.UI.ReadLine(); }, cancellationToken);
         if (result is null)
         {
             logger?.LogError("Sandbox exited with null result");
