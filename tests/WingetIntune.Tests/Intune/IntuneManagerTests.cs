@@ -113,6 +113,97 @@ The Azure command-line interface (Azure CLI) is a set of commands used to create
 
     }
 
+    [Theory]
+    [InlineData(InstallerContext.User, true, "--scope", "user")]
+    [InlineData(InstallerContext.System, true, "--scope", "machine")]
+    [InlineData(InstallerContext.Unknown, false, "--scope", null)]
+    public async Task GenerateInstallerPackage_Versionless_ScriptsContainFullWingetArgs(InstallerContext installerContext, bool expectScope, string scopeArg, string? scopeValue)
+    {
+        var packageId = "Test.Package";
+        var version = "1.0.0";
+        var tempFolder = Path.Combine(Path.GetTempPath(), "intunewin-versionless");
+        var outputFolder = Path.Combine(Path.GetTempPath(), "packages-versionless");
+        var tempPackageFolder = Path.Combine(tempFolder, packageId, version);
+        var outputPackageFolder = Path.Combine(outputFolder, packageId, "latest");
+
+        var packageInfo = new PackageInfo
+        {
+            PackageIdentifier = packageId,
+            DisplayName = "Test Package",
+            Version = version,
+            Source = PackageSource.Winget,
+            InstallerContext = installerContext,
+            InstallerType = InstallerType.Exe,
+            InstallCommandLine = $"winget install --id {packageId} --version {version} --source winget --silent --accept-package-agreements --accept-source-agreements",
+            UninstallCommandLine = $"winget uninstall --id {packageId} --source winget --silent --accept-source-agreements",
+            InstallerFilename = "setup.exe",
+            Installers =
+            [
+                new WingetInstaller
+                {
+                    Architecture = "x64",
+                    Scope = installerContext == InstallerContext.User ? "user"
+                          : installerContext == InstallerContext.System ? "machine"
+                          : null,
+                    InstallerType = "exe",
+                    InstallerUrl = "https://localhost/setup.exe",
+                }
+            ],
+        };
+
+        var capturedScripts = new Dictionary<string, string>();
+
+        var fileManager = Substitute.For<IFileManager>();
+        fileManager.CreateFolderForPackage(tempFolder, packageId, version, false).Returns(tempPackageFolder);
+        fileManager.CreateFolderForPackage(outputFolder, packageId, "latest", false).Returns(outputPackageFolder);
+        fileManager.WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                capturedScripts[Path.GetFileName(ci.ArgAt<string>(0))] = ci.ArgAt<string>(1);
+                return Task.CompletedTask;
+            });
+        fileManager.WriteAllBytesAsync(Arg.Any<string>(), Arg.Any<byte[]>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+        fileManager.DownloadFileAsync(Arg.Any<string>(), Arg.Any<string>(), null, false, false, Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+
+        var intunePackager = Substitute.For<IIntunePackager>();
+        intunePackager.CreatePackage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<PackageInfo>(), Arg.Any<bool>(), cancellationToken: Arg.Any<CancellationToken>())
+            .Returns("test.intunewin");
+
+        var intuneManager = new IntuneManager(new NullLoggerFactory(), fileManager, null, null, null, null, intunePackager, null, null, null, new ComputeBestInstallerForPackageCommand());
+
+        await intuneManager.GenerateInstallerPackage(tempFolder, outputFolder, packageInfo, new PackageOptions { Versionless = true, PackageScript = true, InstallerContext = installerContext }, CancellationToken.None);
+
+        Assert.True(capturedScripts.ContainsKey("install.ps1"), "install.ps1 was not written");
+        Assert.True(capturedScripts.ContainsKey("uninstall.ps1"), "uninstall.ps1 was not written");
+
+        var installScript = capturedScripts["install.ps1"];
+        Assert.Contains("--source", installScript);
+        Assert.Contains("winget", installScript);
+        Assert.Contains("--silent", installScript);
+        Assert.Contains("--accept-package-agreements", installScript);
+        Assert.Contains("--accept-source-agreements", installScript);
+        Assert.DoesNotContain("--version", installScript);
+
+        var uninstallScript = capturedScripts["uninstall.ps1"];
+        Assert.Contains("--source", uninstallScript);
+        Assert.Contains("--silent", uninstallScript);
+        Assert.Contains("--accept-source-agreements", uninstallScript);
+        Assert.DoesNotContain("--version", uninstallScript);
+
+        if (expectScope)
+        {
+            Assert.Contains(scopeArg, installScript);
+            Assert.Contains(scopeValue!, installScript);
+            Assert.Contains(scopeArg, uninstallScript);
+            Assert.Contains(scopeValue!, uninstallScript);
+        }
+        else
+        {
+            Assert.DoesNotContain(scopeArg, installScript);
+            Assert.DoesNotContain(scopeArg, uninstallScript);
+        }
+    }
+
     [Fact]
     public async Task DownloadInstallerAsync_CallsFilemanager()
     {
