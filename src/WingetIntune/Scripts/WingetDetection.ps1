@@ -5,8 +5,10 @@
 # version - The version of the application to be detected
 
 # --------------------------- Start parameters -------------------------------
-$packageId = "{packageId}"
-$version = "{version}"
+Param(
+    [string]$packageId = "{packageId}",
+    [string]$version = "{version}"
+)
 # --------------------------- End parameters ---------------------------------
 
 # ------------------------------------Start script, do not edit below -----------------------------------------
