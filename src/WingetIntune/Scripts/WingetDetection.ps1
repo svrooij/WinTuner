@@ -7,8 +7,6 @@
 # --------------------------- Start parameters -------------------------------
 $packageId = "{packageId}"
 $version = "{version}"
-$packageId = "Git.Git"
-$version = "2.54.0"
 # --------------------------- End parameters ---------------------------------
 
 # ------------------------------------Start script, do not edit below -----------------------------------------
