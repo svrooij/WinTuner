@@ -7,6 +7,8 @@
 # --------------------------- Start parameters -------------------------------
 $packageId = "{packageId}"
 $version = "{version}"
+$packageId = "Git.Git"
+$version = "2.54.0"
 # --------------------------- End parameters ---------------------------------
 
 # ------------------------------------Start script, do not edit below -----------------------------------------
@@ -133,7 +135,7 @@ if($wingetOutput -is [array]) { # the output will be either an array of lines or
 }
 
 if ($packageId -like "*.*") { # If the packageId contains a period enter this logic, it more than likely will
-	$idArray = $packageId -split "." # split the packag into an array at the period
+	$idArray = $packageId.Split(".") # split the packag into an array at the period
 	foreach ($id in $idArray) { # loop through the array, and then run the detection logic on each array element
 		$wingetOutput = & $wingetCmd "list" "--id" $id "--accept-source-agreements"
 
