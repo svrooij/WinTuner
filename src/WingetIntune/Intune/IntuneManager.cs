@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using WingetIntune.Commands;
 using WingetIntune.Graph;
+using WingetIntune.Implementations;
 using WingetIntune.Interfaces;
 using WingetIntune.Internal.Msal;
 using WingetIntune.Intune;
@@ -132,7 +133,17 @@ public partial class IntuneManager
 
         if (packageOptions.Versionless)
         {
-            var installScript = IntuneManagerConstants.GetWingetInstallCmd(packageInfo.PackageIdentifier!);
+            var installArgs = WingetHelper.GetInstallArgumentsForPackage(
+                packageInfo.PackageIdentifier!,
+                version: null,
+                source: "winget",
+                installerContext: packageInfo.InstallerContext ?? InstallerContext.Unknown);
+            var installScript = GetPsCommandContent(
+                "winget " + installArgs,
+                successSearch: "installed",
+                message: $"Package {packageInfo.PackageIdentifier} installed successfully",
+                packageId: packageInfo.PackageIdentifier,
+                action: "install");
             await fileManager.WriteAllTextAsync(
                 Path.Combine(packageTempFolder, "install.ps1"),
                 installScript,
@@ -144,7 +155,16 @@ public partial class IntuneManager
             packageInfo.InstallCommandLine = $"%windir%\\sysnative\\windowspowershell\\v1.0\\powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File install.ps1";
             packageInfo.InstallerFilename = "install.ps1";
 
-            var uninstallScript = IntuneManagerConstants.GetWingetUninstallCmd(packageInfo.PackageIdentifier!);
+            var uninstallArgs = WingetHelper.GetUninstallArgumentsForPackage(
+                packageInfo.PackageIdentifier!,
+                source: "winget",
+                installerContext: packageInfo.InstallerContext ?? InstallerContext.Unknown);
+            var uninstallScript = GetPsCommandContent(
+                "winget " + uninstallArgs,
+                successSearch: "uninstalled",
+                message: $"Package {packageInfo.PackageIdentifier} uninstalled successfully",
+                packageId: packageInfo.PackageIdentifier,
+                action: "uninstall");
             await fileManager.WriteAllTextAsync(
                 Path.Combine(packageTempFolder, "uninstall.ps1"),
                 uninstallScript,
