@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Kiota.Abstractions.Authentication;
 using Svrooij.PowerShell.DI;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,6 @@ using System.Management.Automation;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 

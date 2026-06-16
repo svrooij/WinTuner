@@ -30,8 +30,7 @@ public static class MobileAppsRequestBuilderExtensions
         {
             filter += $" and contains(notes,'{notesContains}')";
         }
-        return builder.GetAsync((config) =>
-        {
+        return builder.GetAsync((config) => {
             config.QueryParameters.Filter = filter;
             config.QueryParameters.Orderby = new[] { "displayName" };
             config.QueryParameters.Top = 999;
@@ -41,8 +40,7 @@ public static class MobileAppsRequestBuilderExtensions
     public static async Task<IEnumerable<Models.IntuneApp>> GetWinTunerAppsAsync(this MobileAppsRequestBuilder builder, string? nameContains = null, bool? isAssigned = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        var response = await builder.GetAsync(config =>
-        {
+        var response = await builder.GetAsync(config => {
             config.QueryParameters.Filter = $"isof('{Win32LobType}') and (contains(notes, '[WinTuner|') or contains(notes, '[WingetIntune|'))";
             if (!string.IsNullOrEmpty(nameContains))
             {

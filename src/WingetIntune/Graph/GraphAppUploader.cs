@@ -6,6 +6,7 @@ using WingetIntune.Intune;
 using WingetIntune.Models;
 
 namespace WingetIntune.Graph;
+
 public partial class GraphAppUploader
 {
     private readonly ILogger<GraphAppUploader> logger;
@@ -96,13 +97,11 @@ public partial class GraphAppUploader
             Win32LobApp? updatedApp = await graphServiceClient.DeviceAppManagement.MobileApps[app.Id].GetAsync(cancellationToken: cancellationToken) as Win32LobApp;
 
             return updatedApp;
-        }
-        catch (Microsoft.Identity.Client.MsalServiceException ex)
+        } catch (Microsoft.Identity.Client.MsalServiceException ex)
         {
             LogErrorPublishingAppAuthFailed(ex, ex.Message);
             throw;
-        }
-        catch (ODataError ex)
+        } catch (ODataError ex)
         {
             LogErrorPublishingAppWithCleanup(ex, ex.Error?.Message ?? "Unknown OData error");
             if (appId != null)
@@ -110,15 +109,13 @@ public partial class GraphAppUploader
                 try
                 {
                     await graphServiceClient.DeviceAppManagement.MobileApps[appId].DeleteAsync(cancellationToken: cancellationToken);
-                }
-                catch (Exception ex2)
+                } catch (Exception ex2)
                 {
                     LogErrorDeletingApp(ex2);
                 }
             }
             throw;
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             LogErrorPublishingAppWithCleanup(ex, ex.Message);
             if (appId != null)
@@ -127,8 +124,7 @@ public partial class GraphAppUploader
                 {
                     // Do not use the cancellationToken here, we want to delete the app no matter what.
                     await graphServiceClient.DeviceAppManagement.MobileApps[appId].DeleteAsync(cancellationToken: CancellationToken.None);
-                }
-                catch (Exception ex2)
+                } catch (Exception ex2)
                 {
                     LogErrorDeletingApp(ex2);
                 }

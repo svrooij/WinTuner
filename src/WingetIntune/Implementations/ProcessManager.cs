@@ -29,16 +29,14 @@ public partial class ProcessManager : IProcessManager
         var output = new StringBuilder();
         var error = new StringBuilder();
 
-        process.OutputDataReceived += (sender, e) =>
-        {
+        process.OutputDataReceived += (sender, e) => {
             if (e.Data != null)
             {
                 output.AppendLine(e.Data);
             }
         };
 
-        process.ErrorDataReceived += (sender, e) =>
-        {
+        process.ErrorDataReceived += (sender, e) => {
             if (e.Data != null)
             {
                 error.AppendLine(e.Data);

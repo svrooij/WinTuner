@@ -1,13 +1,14 @@
 ﻿using WingetIntune.Msi;
 
 namespace WingetIntune.Tests.Msi;
+
 public class MsiDecoderTests
 {
     Task<byte[]> msiBytes;
 
     public MsiDecoderTests()
     {
-        HttpClient client = new HttpClient();
+        using var client = new HttpClient();
 
         // Using LAPS 6.2.0.0 as it's small (about 1MB) and likely to stay up forever
         msiBytes = client.GetByteArrayAsync("https://download.microsoft.com/download/C/7/A/C7AAD914-A8A6-4904-88A1-29E657445D03/LAPS.x64.msi");

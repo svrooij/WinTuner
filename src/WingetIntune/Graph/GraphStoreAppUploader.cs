@@ -5,6 +5,7 @@ using Microsoft.Graph.Beta.Models.ODataErrors;
 using WingetIntune.Models;
 
 namespace WingetIntune.Graph;
+
 public class GraphStoreAppUploader
 {
     private readonly ILogger<GraphStoreAppUploader> logger;
@@ -73,8 +74,7 @@ public class GraphStoreAppUploader
                     Value = await fileManager.ReadAllBytesAsync(imagePath, cancellationToken)
                 };
             }
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             logger.LogError(ex, "Error downloading image for {packageId}", packageId);
         }
@@ -89,13 +89,11 @@ public class GraphStoreAppUploader
             var createdApp = await graphServiceClient.DeviceAppManagement.MobileApps.PostAsync(winGetApp, cancellationToken);
             logger.LogInformation("MsStore app {PackageIdentifier} created in Intune {AppId}", createdApp?.PackageIdentifier, createdApp?.Id);
             return createdApp;
-        }
-        catch (ODataError ex)
+        } catch (ODataError ex)
         {
             logger.LogError(ex, "Error publishing app {Message}", ex.Error?.Message);
             throw;
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             logger.LogError(ex, "Error publishing app");
             throw;

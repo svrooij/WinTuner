@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Svrooij.WinTuner.Proxy.Client;
+
 public class WinTunerProxyClientOptions
 {
     public Uri? BaseAddress { get; set; }

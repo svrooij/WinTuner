@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 
 namespace WingetIntune.Tests;
+
 internal static class HttpContentExtensions
 {
     public static bool IsJson(this HttpContent? content)
@@ -33,8 +34,7 @@ internal static class HttpContentExtensions
                 }
             }
             return true;
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to deserialize JSON: {json}", ex);
         }

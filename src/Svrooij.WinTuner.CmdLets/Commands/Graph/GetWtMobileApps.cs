@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Svrooij.PowerShell.DI;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
+using Svrooij.WinTuner.Proxy.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +10,6 @@ using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
 using WingetIntune.Graph;
-using Svrooij.WinTuner.Proxy.Client;
-using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 
@@ -68,8 +68,7 @@ public partial class GetWtMobileApps : BaseIntuneCmdlet
             sessionId: ConnectWtWinTuner.SessionId,
             command: nameof(GetWtMobileApps),
             appVersion: ConnectWtWinTuner.AppVersion);
-        var apps = await graphServiceClient.DeviceAppManagement.MobileApps.GetAsync(req =>
-        {
+        var apps = await graphServiceClient.DeviceAppManagement.MobileApps.GetAsync(req => {
             List<string> filters = new();
             if (!string.IsNullOrWhiteSpace(NameContains))
             {

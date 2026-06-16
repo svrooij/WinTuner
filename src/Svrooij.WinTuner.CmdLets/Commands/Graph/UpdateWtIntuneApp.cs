@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Beta.Models;
+using Microsoft.Kiota.Abstractions.Authentication;
 using Svrooij.PowerShell.DI;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Kiota.Abstractions.Authentication;
 using WingetIntune.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands.Graph;
@@ -99,8 +99,7 @@ public partial class UpdateWtIntuneApp : BaseIntuneCmdlet
         }
 
         // Load the app to get the relationships
-        var app = await graphServiceClient.DeviceAppManagement.MobileApps[AppId].GetAsync(req =>
-        {
+        var app = await graphServiceClient.DeviceAppManagement.MobileApps[AppId].GetAsync(req => {
             req.QueryParameters.Expand = new string[] { "categories", "assignments" };
         }, cancellationToken: cancellationToken);
 

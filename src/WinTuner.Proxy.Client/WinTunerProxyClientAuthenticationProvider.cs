@@ -2,6 +2,7 @@
 using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace Svrooij.WinTuner.Proxy.Client;
+
 internal class WinTunerProxyClientAuthenticationProvider : IAuthenticationProvider
 {
     private readonly string apiKey;

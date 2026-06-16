@@ -21,8 +21,7 @@ public class StringVersionComparer : Comparer<string>
             var versionx = new Version(x);
             var versiony = new Version(y);
             return versionx.CompareTo(versiony);
-        }
-        catch (Exception) //FormatException
+        } catch (Exception) //FormatException
         {
             // If the version strings are not in a valid format, we can fall back to a string comparison
 

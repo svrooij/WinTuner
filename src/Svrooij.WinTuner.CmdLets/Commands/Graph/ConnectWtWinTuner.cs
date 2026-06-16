@@ -1,15 +1,15 @@
-﻿using Microsoft.Kiota.Abstractions.Authentication;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Abstractions.Authentication;
 using Svrooij.PowerShell.DI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Kiota.Abstractions;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Svrooij.WinTuner.CmdLets.Commands.Graph;
 /// <summary>

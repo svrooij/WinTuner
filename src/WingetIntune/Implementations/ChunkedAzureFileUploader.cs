@@ -58,8 +58,7 @@ public partial class ChunkedAzureFileUploader : IAzureFileUploader
 
             LogFinalizingUpload();
             await FinalizeChunkUpload(sasUri, chunks, cancellationToken);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             LogUploadFailed(ex, filename, sasUri.ToString());
             throw;

@@ -2,9 +2,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Beta;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
+using Svrooij.WinTuner.Proxy.Client;
 using System.Text;
 using WingetIntune.Graph;
-using Svrooij.WinTuner.Proxy.Client;
 
 namespace WingetIntune.Tests.Graph;
 

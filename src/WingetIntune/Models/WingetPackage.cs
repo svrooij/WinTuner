@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WingetIntune.Models;
+
 public class WingetPackage
 {
     public WingetPackage() { }

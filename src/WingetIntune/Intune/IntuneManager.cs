@@ -11,9 +11,9 @@ using WingetIntune.Commands;
 using WingetIntune.Graph;
 using WingetIntune.Interfaces;
 using WingetIntune.Internal.Msal;
-using WingetIntune.Msi;
 using WingetIntune.Intune;
 using WingetIntune.Models;
+using WingetIntune.Msi;
 
 namespace WingetIntune;
 
@@ -425,13 +425,11 @@ public partial class IntuneManager
                 await graphServiceClient.AssignAppAsync(appCreated!.Id!, options.RequiredFor, options.AvailableFor, options.UninstallFor, options.AddAutoUpdateSetting, cancellationToken);
             }
             return appCreated;
-        }
-        catch (ODataError ex)
+        } catch (ODataError ex)
         {
             LogErrorPublishingApp(ex, ex.Error?.Message ?? "Unknown OData error");
             throw;
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             LogErrorPublishingAppGeneral(ex);
             throw;
@@ -450,8 +448,7 @@ public partial class IntuneManager
         try
         {
             await GraphWorkflows.AddIntuneCategoriesToAppAsync(graphServiceClient, appId, categories, cancellationToken);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             LogErrorAddingCategories(ex);
             // Don't throw, just continue.
@@ -470,8 +467,7 @@ public partial class IntuneManager
         {
             var assignments = await GraphWorkflows.AssignAppAsync(graphServiceClient, appId, requiredFor, availableFor, uninstallFor, addAutoUpdateSetting, cancellationToken);
             LogAssignedApp(appId, assignments);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             LogErrorAssigningApp(ex);
             // Don't throw, just continue.
@@ -487,8 +483,7 @@ public partial class IntuneManager
             var logoUri = $"https://api.winstall.app/icons/{packageId}.png";//new Uri($"https://winget.azureedge.net/cache/icons/48x48/{packageId}.png");
             LogDownloadLogo(logoUri);
             await fileManager.DownloadFileAsync(logoUri, logoPath, throwOnFailure: false, overrideFile: false, cancellationToken: cancellationToken);
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             LogErrorDownloadingLogo(e, packageId, logoPath);
         }
@@ -512,8 +507,7 @@ public partial class IntuneManager
         {
             var decoder = new MsiDecoder(setupFile);
             return (decoder.GetCode(), decoder.GetVersion());
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             logger?.LogError(ex, "Error getting product code from {SetupFile} ignoring error, is this actually an MSI? Provide 'MsiProductCode'", setupFile);
         }

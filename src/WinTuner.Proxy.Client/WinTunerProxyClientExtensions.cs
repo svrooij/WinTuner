@@ -1,6 +1,7 @@
 ﻿using Microsoft.Kiota.Abstractions;
 
 namespace Svrooij.WinTuner.Proxy.Client;
+
 public static class WinTunerProxyClientExtensions
 {
     public const string WINTUNER_TELEMETRY_OPT_OUT = nameof(WINTUNER_TELEMETRY_OPT_OUT);
@@ -22,8 +23,7 @@ public static class WinTunerProxyClientExtensions
             return;
         }
 
-        _ = Task.Run(async () =>
-        {
+        _ = Task.Run(async () => {
             try
             {
                 await client.Event.PostAsync(new Models.UsageEventRequest
@@ -33,12 +33,10 @@ public static class WinTunerProxyClientExtensions
                     PackageId = packageId,
                     AppVersion = appVersion,
                 }, cancellationToken: cancellationToken);
-            }
-            catch (ApiException)
+            } catch (ApiException)
             {
                 // ignore all exceptions, we just want to trigger the event
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 // Log the exception if needed, but do not throw it
                 // This is a fire-and-forget method, so we don't want to disrupt the main flow

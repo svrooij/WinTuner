@@ -104,8 +104,7 @@ public partial class WingetManager : IWingetRepository
             var localizedManifest = await fileManager.DownloadStringAsync(localizedManifestUri, cancellationToken: cancellationToken);
             var localizedManifestObject = parser.ParseLocalizedManifest(localizedManifest!);
 
-            installerManifestObject.Installers?.ForEach(i =>
-            {
+            installerManifestObject.Installers?.ForEach(i => {
                 if (i.Scope is null)
                 {
                     i.Scope = installerManifestObject.Scope ?? "system";
@@ -141,8 +140,7 @@ public partial class WingetManager : IWingetRepository
                 Installers = installerManifestObject.Installers,
                 PackageIdentifier = mainManifestObject.PackageIdentifier,
             };
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             LogErrorGetPackageInfo(ex, id, version, ex.Message);
             throw;

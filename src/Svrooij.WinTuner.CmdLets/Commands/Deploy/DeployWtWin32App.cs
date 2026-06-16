@@ -2,6 +2,8 @@
 using Microsoft.Graph.Beta;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Svrooij.PowerShell.DI;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
+using Svrooij.WinTuner.Proxy.Client;
 using System;
 using System.IO;
 using System.Linq;
@@ -10,9 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WingetIntune.Extensions;
 using WingetIntune.Graph;
-using Svrooij.WinTuner.Proxy.Client;
 using GraphModels = Microsoft.Graph.Beta.Models;
-using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <summary>
@@ -352,8 +352,7 @@ public partial class DeployWtWin32App : BaseIntuneCmdlet
     private static async Task SupersedeApp(ILogger logger, GraphServiceClient graphServiceClient, string newAppId, string oldAppId, bool keepOldAssignments, CancellationToken cancellationToken)
     {
         logger?.LogDebug("Loading old app {OldAppId} to superseed", oldAppId);
-        var oldApp = await graphServiceClient.DeviceAppManagement.MobileApps[oldAppId].GetAsync(req =>
-        {
+        var oldApp = await graphServiceClient.DeviceAppManagement.MobileApps[oldAppId].GetAsync(req => {
             req.QueryParameters.Expand = new string[] { "categories", "assignments" };
         }, cancellationToken);
 

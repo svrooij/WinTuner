@@ -1,4 +1,5 @@
 ﻿namespace WingetIntune.Implementations;
+
 internal class WingetManagerKeys
 {
     internal const string WingetPrefixEn = "Found ";

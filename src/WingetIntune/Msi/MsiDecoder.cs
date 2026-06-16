@@ -1,5 +1,5 @@
-﻿using System.Text;
-using OpenMcdf;
+﻿using OpenMcdf;
+using System.Text;
 
 namespace WingetIntune.Msi;
 /// <summary>
@@ -30,8 +30,7 @@ public class MsiDecoder
             {
                 load(cf);
             }
-        }
-        catch (CFFileFormatException e)
+        } catch (CFFileFormatException e)
         {
             throw new InvalidDataException($"MSI Parsing error: Attempted to parse the MSI file at {filePath}, but the file was corrupt.", e);
         }
@@ -45,8 +44,7 @@ public class MsiDecoder
             {
                 load(cf);
             }
-        }
-        catch (CFFileFormatException e)
+        } catch (CFFileFormatException e)
         {
             throw new InvalidDataException($"MSI Parsing error: Attempted to parse an MSI Stream, but the data was corrupt.", e);
         }
@@ -90,17 +88,14 @@ public class MsiDecoder
             tables = LoadTablesTable(cf);
             columns = LoadColumns(cf);
             allTables = LoadAllTables(cf);
-        }
-        catch (CFItemNotFound e)
+        } catch (CFItemNotFound e)
         {
             throw new InvalidDataException("MSI Parsing error: A stream was being looked for in the MSI file, but was not found. Either the MSI file is corrupt, or the library used to read the MSI file is broken.", e);
-        }
-        catch (InvalidDataException)
+        } catch (InvalidDataException)
         {
             throw;
 
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             throw new InvalidDataException("MSI Parsing error: A generic error was encountered while parsing the MSI file.", e);
         }
@@ -306,16 +301,14 @@ public class MsiDecoder
             try
             {
                 tableStream = cf.RootStorage.GetStream(EncodeStreamName($"${table}"));
-            }
-            catch (CFItemNotFound)
+            } catch (CFItemNotFound)
             { }
             if (tableStream == null)
             {
                 try
                 {
                     tableStream = cf.RootStorage.GetStream(EncodeStreamName(table));
-                }
-                catch (CFItemNotFound)
+                } catch (CFItemNotFound)
                 { }
             }
             if (tableStream == null)
@@ -323,8 +316,7 @@ public class MsiDecoder
                 try
                 {
                     tableStream = cf.RootStorage.GetStream(table);
-                }
-                catch (CFItemNotFound)
+                } catch (CFItemNotFound)
                 {
                     // The table is empty, ignore.
                     results[table] = new List<Dictionary<string, object>>();

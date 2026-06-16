@@ -72,8 +72,7 @@ public static class GraphWorkflows
         ArgumentNullException.ThrowIfNull(cancellationToken);
 #endif
 
-        var app = await graphServiceClient.DeviceAppManagement.MobileApps[appId].GetAsync(req =>
-        {
+        var app = await graphServiceClient.DeviceAppManagement.MobileApps[appId].GetAsync(req => {
             req.QueryParameters.Expand = new[] { "assignments" };
         }, cancellationToken: cancellationToken);
 

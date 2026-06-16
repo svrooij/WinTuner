@@ -4,6 +4,7 @@ using WingetIntune.Implementations;
 using WingetIntune.Models;
 
 namespace WingetIntune.Commands;
+
 public partial class ComputeBestInstallerForPackageCommand
 {
     private readonly ILogger<ComputeBestInstallerForPackageCommand> _logger;

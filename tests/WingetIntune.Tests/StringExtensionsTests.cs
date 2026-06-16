@@ -1,5 +1,6 @@
 using WingetIntune.Models;
 namespace WingetIntune.Tests;
+
 public class StringExtensionsTests
 {
     [Fact]
