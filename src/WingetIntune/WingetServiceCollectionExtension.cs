@@ -13,8 +13,10 @@ public static class WingetServiceCollectionExtension
     public const string DEFAULT_PROXY_CODE = "*REPLACED_AT_BUILD*";
     public static IServiceCollection AddWingetServices(this IServiceCollection services, string? proxyCode = null)
     {
-        services.ConfigureHttpClientDefaults(config => {
-            config.ConfigureHttpClient(client => {
+        services.ConfigureHttpClientDefaults(config =>
+        {
+            config.ConfigureHttpClient(client =>
+            {
                 client.DefaultRequestHeaders.Add("User-Agent", "WinTuner");
                 client.Timeout = TimeSpan.FromSeconds(180);
                 // Set buffer size to 500MB
@@ -24,7 +26,8 @@ public static class WingetServiceCollectionExtension
         });
 
         services.AddKiotaHandlers();
-        services.AddHttpClient<Graph.GraphClientFactory>((sp, client) => {
+        services.AddHttpClient<Graph.GraphClientFactory>((sp, client) =>
+        {
             client.BaseAddress = new Uri("https://graph.microsoft.com/beta");
         }).AttachKiotaHandlers();
 
@@ -55,7 +58,8 @@ public static class WingetServiceCollectionExtension
         services.AddTransient<WindowsSandbox>();
         services.AddTransient<Commands.ComputeBestInstallerForPackageCommand>();
 
-        services.AddWinTunerProxyClient(config => {
+        services.AddWinTunerProxyClient(config =>
+        {
             var codeFromEnv = Environment.GetEnvironmentVariable("WINTUNER_PROXY_CODE");
             if (!string.IsNullOrEmpty(codeFromEnv))
             {

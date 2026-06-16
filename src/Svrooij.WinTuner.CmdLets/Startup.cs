@@ -22,7 +22,8 @@ public class Startup : PsStartup
     /// <inheritdoc/>
     public override Action<PowerShellLoggerConfiguration> ConfigurePowerShellLogging()
     {
-        return builder => {
+        return builder =>
+        {
             builder.DefaultLevel = LogLevel.Debug;
             builder.LogLevel.Add("System.Net.Http.HttpClient", LogLevel.Warning);
             builder.LogLevel.Add("System.Net.Http.HttpClient.GraphClientFactory.LogicalHandler", LogLevel.Warning);

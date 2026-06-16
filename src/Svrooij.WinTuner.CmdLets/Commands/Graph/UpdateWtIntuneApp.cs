@@ -99,7 +99,8 @@ public partial class UpdateWtIntuneApp : BaseIntuneCmdlet
         }
 
         // Load the app to get the relationships
-        var app = await graphServiceClient.DeviceAppManagement.MobileApps[AppId].GetAsync(req => {
+        var app = await graphServiceClient.DeviceAppManagement.MobileApps[AppId].GetAsync(req =>
+        {
             req.QueryParameters.Expand = new string[] { "categories", "assignments" };
         }, cancellationToken: cancellationToken);
 

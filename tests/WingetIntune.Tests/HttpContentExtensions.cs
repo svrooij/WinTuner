@@ -34,7 +34,8 @@ internal static class HttpContentExtensions
                 }
             }
             return true;
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to deserialize JSON: {json}", ex);
         }

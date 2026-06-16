@@ -88,7 +88,8 @@ public partial class NewIntuneWinPackage : DependencyCmdlet<Startup>
             var location = await _packager!.CreatePackage(SourcePath!, DestinationPath!, setupFile, partialPackage: PartialPackage, cancellationToken: cancellationToken);
             _logger?.LogInformation("Package created at {location}", location);
             WriteObject(location);
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             _logger?.LogWarning(ex, "Error creating a package");
         }

@@ -2,16 +2,22 @@
 
 namespace WingetIntune.Tests.Msi;
 
-public class MsiDecoderTests
+public sealed class MsiDecoderTests : IDisposable
 {
+    private readonly HttpClient client = new HttpClient();
     Task<byte[]> msiBytes;
 
     public MsiDecoderTests()
     {
-        using var client = new HttpClient();
 
         // Using LAPS 6.2.0.0 as it's small (about 1MB) and likely to stay up forever
         msiBytes = client.GetByteArrayAsync("https://download.microsoft.com/download/C/7/A/C7AAD914-A8A6-4904-88A1-29E657445D03/LAPS.x64.msi");
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        client.Dispose();
     }
 
     [Fact]

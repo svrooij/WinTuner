@@ -130,6 +130,7 @@ dotnet_style_qualification_for_property = false:silent
 dotnet_style_qualification_for_method = false:silent
 dotnet_style_qualification_for_event = false:silent
 insert_final_newline = true
+dotnet_diagnostic.CA2000.severity = warning
 
 [Msi*.cs]
 

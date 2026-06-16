@@ -68,7 +68,8 @@ public partial class GetWtMobileApps : BaseIntuneCmdlet
             sessionId: ConnectWtWinTuner.SessionId,
             command: nameof(GetWtMobileApps),
             appVersion: ConnectWtWinTuner.AppVersion);
-        var apps = await graphServiceClient.DeviceAppManagement.MobileApps.GetAsync(req => {
+        var apps = await graphServiceClient.DeviceAppManagement.MobileApps.GetAsync(req =>
+        {
             List<string> filters = new();
             if (!string.IsNullOrWhiteSpace(NameContains))
             {

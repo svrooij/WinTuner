@@ -91,7 +91,8 @@ public sealed class InteractiveAuthenticationProvider : IAuthenticationProvider,
                 ? await publicClientApplication.AcquireTokenSilent(scopes, userId).ExecuteAsync(cancellationToken)
                 : await publicClientApplication.AcquireTokenSilent(scopes, account).ExecuteAsync(cancellationToken);
             return authenticationResult;
-        } catch (MsalUiRequiredException)
+        }
+        catch (MsalUiRequiredException)
         {
             return await AcquireTokenInteractiveAsync(scopes, tenantId, account?.Username ?? userId, cancellationToken);
         }

@@ -165,7 +165,8 @@ public partial class DeployWtMsStoreApp : BaseIntuneCmdlet
                 await graphServiceClient.AssignAppAsync(app!.Id!, RequiredFor, AvailableFor, UninstallFor, false, cancellationToken);
             }
             WriteObject(app);
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger!.LogError(ex, "Error creating MSStore app {PackageId}", PackageId);
         }

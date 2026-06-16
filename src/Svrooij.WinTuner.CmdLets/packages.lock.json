@@ -627,8 +627,8 @@
       },
       "OpenMcdf": {
         "type": "Transitive",
-        "resolved": "2.3.1",
-        "contentHash": "2Otbtp5FsIkdtWn4904oftoyOigllM/Auz2V7qIpxNaK+MC1C2ENjNXL3/ZdKWFLOs24/Bi/lYOE254C7s3Pgw=="
+        "resolved": "2.4.1",
+        "contentHash": "0XVhI+P6pe80xYntIeF6H4F7AIL4ZolMTI5vkm3QUt9XTnRJht6CNYk1eSfI8YInRble6cw91ypF5llPXzKD/A=="
       },
       "Riok.Mapperly": {
         "type": "Transitive",
@@ -1090,7 +1090,7 @@
           "Microsoft.Identity.Client.Broker": "[4.77.0, )",
           "Microsoft.Identity.Client.Extensions.Msal": "[4.77.0, )",
           "Microsoft.Kiota.Authentication.Azure": "[1.19.1, )",
-          "OpenMcdf": "[2.3.1, 2.3.1]",
+          "OpenMcdf": "[2.4.1, 2.4.1]",
           "Riok.Mapperly": "[3.6.0, )",
           "SvRooij.ContentPrep": "[0.4.0, )",
           "WinTuner.Proxy.Client": "[1.0.0, )",

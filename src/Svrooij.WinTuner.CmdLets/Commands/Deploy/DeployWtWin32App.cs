@@ -352,7 +352,8 @@ public partial class DeployWtWin32App : BaseIntuneCmdlet
     private static async Task SupersedeApp(ILogger logger, GraphServiceClient graphServiceClient, string newAppId, string oldAppId, bool keepOldAssignments, CancellationToken cancellationToken)
     {
         logger?.LogDebug("Loading old app {OldAppId} to superseed", oldAppId);
-        var oldApp = await graphServiceClient.DeviceAppManagement.MobileApps[oldAppId].GetAsync(req => {
+        var oldApp = await graphServiceClient.DeviceAppManagement.MobileApps[oldAppId].GetAsync(req =>
+        {
             req.QueryParameters.Expand = new string[] { "categories", "assignments" };
         }, cancellationToken);
 

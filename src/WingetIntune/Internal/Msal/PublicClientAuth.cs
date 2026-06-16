@@ -100,7 +100,8 @@ public partial class PublicClientAuth : IAuthenticationProvider, IDisposable
             authenticationResult = await publicClientApplication.AcquireTokenSilent(scopes, account).ExecuteAsync(cancellationToken);
             LogAcquiredTokenSilently(scopes, tenantId ?? authenticationResult.TenantId, authenticationResult.Account.Username);
             return authenticationResult;
-        } catch (MsalUiRequiredException)
+        }
+        catch (MsalUiRequiredException)
         {
             return await AcquireTokenInteractiveAsync(scopes, tenantId, userId, cancellationToken);
         }

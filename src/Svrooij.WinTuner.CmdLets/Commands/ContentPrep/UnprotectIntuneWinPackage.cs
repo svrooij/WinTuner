@@ -65,7 +65,8 @@ public partial class UnprotectIntuneWinPackage : DependencyCmdlet<Startup>
             }
 
             await packager.Unpack(SourceFile, DestinationPath, cancellationToken);
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger?.LogError(ex, "Error unlocking package");
         }
