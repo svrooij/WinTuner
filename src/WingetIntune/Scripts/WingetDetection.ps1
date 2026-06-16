@@ -46,11 +46,25 @@ Function Get-ColumnValuesFromWingetOutput {
     }
 
     if ($Output -is [array] -and $Output.Length -gt 2) {
-        # $Output is an array, first row is header, last row is data
-        # this will break if multiple lines are returned, but that should not happen with --exact
-        #$headerRow = $Output[$Output.Length - 3]
-        $headerRow = $Output | Where-Object { $_ -match '^[A-Za-z]' } | Select-Object -First 1
-        $lastRow = $Output[$Output.Length - 1]
+        # Anchor on the separator line (--- dashes) which is stable across winget versions.
+        # Newer winget appends a "N package(s)" count line, so we cannot rely on $Output[-1].
+        # Source-refresh messages ("Updating sources...") appear before the table, so we
+        # cannot rely on the first alpha line being the header.
+        $separatorIndex = -1
+        for ($s = 0; $s -lt $Output.Length; $s++) {
+            if ($Output[$s] -match '^-{10,}') {
+                $separatorIndex = $s
+                break
+            }
+        }
+
+        if ($separatorIndex -le 0 -or $separatorIndex + 1 -ge $Output.Length) {
+            Write-Host "Could not find separator line in winget output"
+            return @()
+        }
+
+        $headerRow = $Output[$separatorIndex - 1]
+        $lastRow = $Output[$separatorIndex + 1]
 
         # Find the start index of each column by searching for non-space transitions
         $columnStarts = @()
@@ -63,12 +77,16 @@ Function Get-ColumnValuesFromWingetOutput {
         # Add the end of the line as the last column boundary
         $columnStarts += $lastRow.Length
 
-        # Extract column values from the data row
+        # Extract column values from the data row, guarding against short rows
         $columns = @()
         for ($i = 0; $i -lt $columnStarts.Count - 1; $i++) {
             $start = $columnStarts[$i]
-            $length = $columnStarts[$i + 1] - $start
-            $columns += $lastRow.Substring($start, $length).Trim()
+            if ($start -ge $lastRow.Length) {
+                $columns += ""
+            } else {
+                $length = [Math]::Min($columnStarts[$i + 1] - $start, $lastRow.Length - $start)
+                $columns += $lastRow.Substring($start, $length).Trim()
+            }
         }
 
         return $columns
