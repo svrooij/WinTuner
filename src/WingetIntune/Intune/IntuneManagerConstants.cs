@@ -1,5 +1,4 @@
-﻿using Microsoft.Graph.Beta.Models.TermStore;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace WingetIntune.Intune;
 
@@ -26,22 +25,6 @@ internal class IntuneManagerConstants
             .Replace("{packageId}", packageId ?? Guid.NewGuid().ToString());
 
         return script;
-    }
-
-    internal static string GetWingetInstallCmd(string packageId, string? version = null)
-    {
-        var command = version is null
-            ? $"$(Get-WingetCmd) \"install\" \"--id\" \"{packageId}\" \"--exact\""
-            : $"$(Get-WingetCmd) \"install\" \"--id\" \"{packageId}\" \"--exact\" \"--version\" \"{version}\"";
-        return GetPsWingetCmd("install", command, "installed", $"Package {packageId} v{version} installed successfully", packageId);
-    }
-
-    internal static string GetWingetUninstallCmd(string packageId, string? version = null)
-    {
-        var command = version is null
-            ? $"$(Get-WingetCmd) \"uninstall\" \"--id\" \"{packageId}\" \"--exact\""
-            : $"$(Get-WingetCmd) \"uninstall\" \"--id\" \"{packageId}\" \"--exact\" \"--version\" \"{version}\"";
-        return GetPsWingetCmd("uninstall", command, "uninstalled", $"Package {packageId} v{version} uninstalled successfully", packageId);
     }
 
     internal static string GetPsGetWingetCmd()
