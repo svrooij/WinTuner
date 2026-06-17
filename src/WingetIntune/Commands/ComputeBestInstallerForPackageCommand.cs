@@ -27,9 +27,10 @@ public partial class ComputeBestInstallerForPackageCommand
         package.InstallerUrl = new Uri(installer.InstallerUrl!);
         package.InstallerFilename = Path.GetFileName(package.InstallerUrl.LocalPath.Replace(" ", ""));
 
-        if (string.IsNullOrEmpty(package.InstallerFilename))
+        // Maybe just never trust the installer filename and always generate?
+        if (string.IsNullOrEmpty(package.InstallerFilename) || package.InstallerFilename.IndexOf('.') == -1)
         {
-            package.InstallerFilename = $"{package.PackageIdentifier}_{package.Version}.{GuessInstallerExtension(installer.ParseInstallerType())}";
+            package.InstallerFilename = $"{package.PackageIdentifier}-{package.Version}.{GuessInstallerExtension(installer.ParseInstallerType())}";
         }
 
         // Maybe this should be done for other installers as well?

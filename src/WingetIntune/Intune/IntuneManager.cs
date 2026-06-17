@@ -77,7 +77,15 @@ public partial class IntuneManager
         await WriteReadmeAsync(packageFolder, packageInfo, cancellationToken);
         await WritePackageInfo(packageFolder, packageInfo, cancellationToken);
 
-        return new Models.WingetPackage(packageInfo, packageFolder, intunePackage!) { InstallerArguments = packageInfo.InstallCommandLine?.Substring(packageInfo.InstallerFilename?.Length + 3 ?? 0), InstallerFile = packageInfo.InstallerFilename };
+        var command = packageInfo.InstallCommandLine!.Replace("msiexec /i ", "");
+
+
+        return new Models.WingetPackage(packageInfo, packageFolder, intunePackage!)
+        {
+            InstallerArguments = command.Substring(command.IndexOf(packageInfo.InstallerFilename!) + packageInfo.InstallerFilename!.Length).Trim(),
+            InstallerFile = packageInfo.InstallerFilename,
+            InstallCommand = packageInfo.InstallCommandLine
+        };
     }
 
     /// <summary>

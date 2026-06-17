@@ -123,7 +123,7 @@ public class TestWtIntuneWin : DependencyCmdlet<Startup>
     [Parameter(
         Mandatory = false,
         ParameterSetName = nameof(PackageFolder),
-        Position = 3,
+        Position = 4,
         HelpMessage = "Clean the test files after run")]
     [Parameter(
         Mandatory = false,
@@ -143,7 +143,7 @@ public class TestWtIntuneWin : DependencyCmdlet<Startup>
     [Parameter(
         Mandatory = false,
         ParameterSetName = nameof(PackageFolder),
-        Position = 4,
+        Position = 5,
         HelpMessage = "Sleep for x seconds before auto shutdown")]
     [Parameter(
         Mandatory = false,
@@ -180,7 +180,7 @@ public class TestWtIntuneWin : DependencyCmdlet<Startup>
         {
             logger?.LogInformation("Loading package details from folder {PackageFolder}", PackageFolder);
             var packageInfo = await metadataManager!.LoadPackageInfoFromFolderAsync(PackageFolder, cancellationToken);
-            InstallerFilename = packageInfo.InstallerFilename;
+            InstallerFilename ??= packageInfo.InstallerFilename;
             // If the installer arguments are not set, use the ones from the package info.
             InstallerArguments ??= packageInfo.InstallCommandLine?.Replace($"\"{packageInfo.InstallerFilename!}\" ", "");
             IntuneWinFile = metadataManager.GetIntuneWinFileName(PackageFolder, packageInfo);
@@ -195,7 +195,7 @@ public class TestWtIntuneWin : DependencyCmdlet<Startup>
 
         var sandboxFile = await sandbox!.PrepareSandboxFileForPackage(IntuneWinFile!, InstallerFilename, InstallerArguments, timeout: Sleep, cancellationToken: cancellationToken);
         logger?.LogDebug("Sandbox file created at {SandboxFile}", sandboxFile);
-        var result = await sandbox.RunSandbox(sandboxFile, Clean, cancellationToken);
+        var result = await sandbox.RunSandbox(sandboxFile, Clean, () => { this.Host.UI.ReadLine(); }, cancellationToken);
         if (result is null)
         {
             logger?.LogError("Sandbox exited with null result");
