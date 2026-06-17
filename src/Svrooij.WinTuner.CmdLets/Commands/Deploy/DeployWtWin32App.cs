@@ -2,6 +2,8 @@
 using Microsoft.Graph.Beta;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Svrooij.PowerShell.DI;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
+using Svrooij.WinTuner.Proxy.Client;
 using System;
 using System.IO;
 using System.Linq;
@@ -10,9 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WingetIntune.Extensions;
 using WingetIntune.Graph;
-using Svrooij.WinTuner.Proxy.Client;
 using GraphModels = Microsoft.Graph.Beta.Models;
-using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <summary>

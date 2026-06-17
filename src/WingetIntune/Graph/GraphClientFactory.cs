@@ -2,6 +2,7 @@
 using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace WingetIntune.Graph;
+
 public class GraphClientFactory
 {
     private readonly System.Net.Http.HttpClient httpClient;

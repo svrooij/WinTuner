@@ -5,6 +5,7 @@ using Microsoft.Graph.Beta.Models.ODataErrors;
 using WingetIntune.Models;
 
 namespace WingetIntune.Graph;
+
 public class GraphStoreAppUploader
 {
     private readonly ILogger<GraphStoreAppUploader> logger;

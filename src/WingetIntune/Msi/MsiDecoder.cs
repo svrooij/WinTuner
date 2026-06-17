@@ -1,5 +1,5 @@
-﻿using System.Text;
-using OpenMcdf;
+﻿using OpenMcdf;
+using System.Text;
 
 namespace WingetIntune.Msi;
 /// <summary>

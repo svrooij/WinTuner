@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
+
 internal static class CmdLetExtensions
 {
     /// <summary>

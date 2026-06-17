@@ -1,4 +1,5 @@
 ﻿namespace Winget.CommunityRepository.Models;
+
 public class WingetEntry
 {
     public string? Name { get; set; }

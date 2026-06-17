@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 
 namespace WingetIntune.Tests;
+
 internal static class HttpContentExtensions
 {
     public static bool IsJson(this HttpContent? content)

@@ -1,10 +1,10 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Http.HttpClientLibrary;
+using Svrooij.WinTuner.Proxy.Client;
+using System.Runtime.CompilerServices;
 using WingetIntune.Interfaces;
 using WingetIntune.Intune;
 using WingetIntune.Testing;
-using Svrooij.WinTuner.Proxy.Client;
 [assembly: InternalsVisibleTo("WingetIntune.Tests")]
 namespace WingetIntune;
 

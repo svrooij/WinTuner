@@ -2,6 +2,7 @@
 using Microsoft.Kiota.Http.HttpClientLibrary;
 
 namespace Svrooij.WinTuner.Proxy.Client;
+
 internal class WinTunerProxyClientFactory
 {
     private readonly WinTunerProxyClientOptions options;

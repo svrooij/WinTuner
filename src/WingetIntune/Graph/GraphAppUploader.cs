@@ -6,6 +6,7 @@ using WingetIntune.Intune;
 using WingetIntune.Models;
 
 namespace WingetIntune.Graph;
+
 public partial class GraphAppUploader
 {
     private readonly ILogger<GraphAppUploader> logger;

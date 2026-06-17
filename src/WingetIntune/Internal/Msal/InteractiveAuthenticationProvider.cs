@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace WingetIntune.Internal.Msal;
 
-public sealed class InteractiveAuthenticationProvider : IAuthenticationProvider
+public sealed class InteractiveAuthenticationProvider : IAuthenticationProvider, IDisposable
 {
     private readonly InteractiveAuthenticationProviderOptions _options;
     private readonly IPublicClientApplication publicClientApplication;
@@ -141,6 +141,11 @@ public sealed class InteractiveAuthenticationProvider : IAuthenticationProvider
             };
             request.AddHeaders(headers);
         }
+    }
+
+    public void Dispose()
+    {
+        throw new NotImplementedException();
     }
 }
 

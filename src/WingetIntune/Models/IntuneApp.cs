@@ -1,4 +1,5 @@
 namespace WingetIntune.Models;
+
 public class IntuneApp
 {
     /// <summary>

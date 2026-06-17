@@ -1,13 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Kiota.Abstractions.Authentication;
 using Svrooij.PowerShell.DI;
+using Svrooij.WinTuner.CmdLets.Commands.Graph;
+using Svrooij.WinTuner.Proxy.Client;
 using System;
 using System.IO;
 using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Kiota.Abstractions.Authentication;
-using Svrooij.WinTuner.Proxy.Client;
-using Svrooij.WinTuner.CmdLets.Commands.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands;
 /// <summary>

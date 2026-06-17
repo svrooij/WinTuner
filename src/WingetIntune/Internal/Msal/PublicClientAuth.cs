@@ -8,7 +8,7 @@ using Microsoft.Kiota.Abstractions.Authentication;
 
 namespace WingetIntune.Internal.Msal;
 
-public partial class PublicClientAuth : IAuthenticationProvider
+public partial class PublicClientAuth : IAuthenticationProvider, IDisposable
 {
     private readonly PublicClientOptions _options;
     private readonly IPublicClientApplication publicClientApplication;
@@ -158,6 +158,11 @@ public partial class PublicClientAuth : IAuthenticationProvider
     // logger.LogTrace("Acquired token silently {@scopes} {tenantId} {username}", scopes, tenantId ?? authenticationResult.TenantId, authenticationResult.Account.Username);
     [LoggerMessage(EventId = 101, Level = Microsoft.Extensions.Logging.LogLevel.Trace, Message = "Acquired token silently {Scopes} {TenantId} {UserId}")]
     private partial void LogAcquiredTokenSilently(IEnumerable<string> Scopes, string? TenantId, string? UserId);
+
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class PublicClientOptions

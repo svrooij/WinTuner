@@ -12,9 +12,9 @@ using WingetIntune.Graph;
 using WingetIntune.Implementations;
 using WingetIntune.Interfaces;
 using WingetIntune.Internal.Msal;
-using WingetIntune.Msi;
 using WingetIntune.Intune;
 using WingetIntune.Models;
+using WingetIntune.Msi;
 
 namespace WingetIntune;
 

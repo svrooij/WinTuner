@@ -1,6 +1,6 @@
-﻿using WingetIntune.Extensions;
+﻿using Winget.CommunityRepository.Models;
+using WingetIntune.Extensions;
 using WingetIntune.Implementations;
-using Winget.CommunityRepository.Models;
 
 namespace WingetIntune.Models;
 

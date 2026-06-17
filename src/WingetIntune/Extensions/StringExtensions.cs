@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WingetIntune.Extensions;
+
 public static class StringExtensions
 {
     public static async Task<T?> ParseJson<T>(this string serializedContent, CancellationToken cancellationToken) where T : IParsable

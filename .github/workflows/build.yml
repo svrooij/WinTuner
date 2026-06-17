@@ -39,6 +39,7 @@ jobs:
           dotnet-version: |
             8.x
             9.x
+            10.x
 
       - name: 🔍 Enable problem matchers
         run: echo "::add-matcher::.github/matchers/dotnet.json"
@@ -94,6 +95,7 @@ jobs:
           dotnet-version: |
             8.x
             9.x
+            10.x
 
       - name: 🔍 Enable problem matchers
         run: echo "::add-matcher::.github/matchers/dotnet.json"
@@ -177,6 +179,7 @@ jobs:
         dotnet-version: |
           8.x
           9.x
+          10.x
 
     - name: 🔍 Enable problem matchers
       run: echo "::add-matcher::.github/matchers/dotnet.json"
