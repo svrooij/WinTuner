@@ -118,6 +118,14 @@ public partial class WingetManager : IWingetRepository
                 {
                     i.InstallerType = installerManifestObject.InstallerType;
                 }
+                if (i.NestedInstallerType is null && installerManifestObject.NestedInstallerType is not null)
+                {
+                    i.NestedInstallerType = installerManifestObject.NestedInstallerType;
+                }
+                if (i.NestedInstallerFiles is null && installerManifestObject.NestedInstallerFiles is not null)
+                {
+                    i.NestedInstallerFiles = installerManifestObject.NestedInstallerFiles;
+                }
             });
 
             var installer = installerManifestObject.InstallerType

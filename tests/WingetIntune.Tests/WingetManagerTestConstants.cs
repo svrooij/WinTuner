@@ -195,4 +195,51 @@ Tags:
 ReleaseNotesUrl: https://github.com/JanDeDobbeleer/oh-my-posh/releases/tag/v18.3.3
 ManifestType: defaultLocale
 ManifestVersion: 1.4.0";
+
+    // Adobe Acrobat Pro - a real-world package that uses InstallerType: zip with NestedInstallerType: exe
+    internal const string adobeAcrobatYaml = @"PackageIdentifier: Adobe.Acrobat.Pro
+PackageVersion: 26.001.21662
+DefaultLocale: en-US
+ManifestType: version
+ManifestVersion: 1.4.0";
+
+    internal const string adobeAcrobatInstallYaml = @"PackageIdentifier: Adobe.Acrobat.Pro
+PackageVersion: 26.001.21662
+InstallerType: zip
+NestedInstallerType: exe
+NestedInstallerFiles:
+- RelativeFilePath: Adobe Acrobat\setup.exe
+Scope: machine
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+InstallerSwitches:
+  Silent: /sAll /rs /msi
+  SilentWithProgress: /sPB /rs /msi
+  Interactive: /msi
+  Custom: EULA_ACCEPT=YES
+ProductCode: '{AC76BA86-1033-FFFF-7760-BC15014EA700}'
+AppsAndFeaturesEntries:
+- DisplayName: Adobe Acrobat (64-bit)
+  ProductCode: '{AC76BA86-1033-FFFF-7760-BC15014EA700}'
+  InstallerType: msi
+Installers:
+- Architecture: x64
+  InstallerUrl: https://trials.adobe.com/AdobeProducts/APRO/Acrobat_HelpX/win32/Acrobat_DC_Web_x64_WWMUI.zip
+  InstallerSha256: C310F060D303CFE6A8EC8DFE60B403CF659C25B50C0C2AE65BC4A146142AEAB2
+ManifestType: installer
+ManifestVersion: 1.4.0";
+
+    internal const string adobeAcrobatLocaleYaml = @"PackageIdentifier: Adobe.Acrobat.Pro
+PackageVersion: 26.001.21662
+PackageLocale: en-US
+Publisher: Adobe
+PublisherUrl: https://www.adobe.com/
+PublisherSupportUrl: https://helpx.adobe.com/support.html
+PackageName: Adobe Acrobat Pro
+PackageUrl: https://www.adobe.com/acrobat/acrobat-pro.html
+ShortDescription: Adobe Acrobat Pro PDF editor
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0";
 }

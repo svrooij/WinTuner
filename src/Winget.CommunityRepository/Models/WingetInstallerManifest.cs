@@ -9,6 +9,8 @@ public partial class WingetInstallerManifest
     public WingetInstallerSwitches? InstallerSwitches { get; set; }
     public string? Scope { get; set; }
     public string? InstallerType { get; set; }
+    public string? NestedInstallerType { get; set; }
+    public List<WingetNestedInstallerFile>? NestedInstallerFiles { get; set; }
     public List<string>? InstallModes { get; set; }
     public string? UpgradeBehavior { get; set; }
     public List<string>? Commands { get; set; }
@@ -25,6 +27,8 @@ public partial class WingetInstaller
     public string? Architecture { get; set; }
     public string? Scope { get; set; }
     public string? InstallerType { get; set; }
+    public string? NestedInstallerType { get; set; }
+    public List<WingetNestedInstallerFile>? NestedInstallerFiles { get; set; }
     public string? InstallerUrl { get; set; }
     public string? InstallerSha256 { get; set; }
     public WingetInstallerSwitches? InstallerSwitches { get; set; }
@@ -75,5 +79,11 @@ public partial class WingetAppsAndFeatures
     public string? Publisher { get; set; }
     public string? DisplayVersion { get; set; }
     public string? ProductCode { get; set; }
+}
+
+public partial class WingetNestedInstallerFile
+{
+    public string? RelativeFilePath { get; set; }
+    public string? PortableCommandAlias { get; set; }
 }
 
