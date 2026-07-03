@@ -9,7 +9,7 @@ namespace WingetIntune.Models;
 public class WingetPackage
 {
     public WingetPackage() { }
-    internal WingetPackage(PackageInfo packageInfo, string packageFolder, string packageFilename)
+    internal WingetPackage(PackageInfo packageInfo, string packageFolder, string? packageFilename)
     {
         PackageId = packageInfo.PackageIdentifier!;
         Version = packageInfo.Version!;
@@ -34,7 +34,7 @@ public class WingetPackage
     /// <summary>
     /// The filename of the intunewin file
     /// </summary>
-    public string PackageFile { get; set; }
+    public string? PackageFile { get; set; }
 
     /// <summary>
     /// Installer filename

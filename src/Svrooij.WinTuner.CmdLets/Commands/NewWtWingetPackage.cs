@@ -167,6 +167,19 @@ public partial class NewWtWingetPackage : DependencyCmdlet<Startup>
         HelpMessage = "Creating a partial package means that the files are not zipped into the intunewin file, but are left as is.")]
     public SwitchParameter PartialPackage { get; set; }
 
+    /// <summary>
+    /// Download the installer and prepare the package folder without creating the .intunewin file.
+    /// Use this to customize the package contents (e.g. install/uninstall scripts) before packaging.
+    /// After customizing, use New-IntuneWinPackage to create the .intunewin file.
+    /// </summary>
+    [Parameter(
+        Mandatory = false,
+        Position = 16,
+        ValueFromPipeline = false,
+        ValueFromPipelineByPropertyName = false,
+        HelpMessage = "Download the installer and prepare the package folder without creating the .intunewin file. Allows customizing the package contents before packaging.")]
+    public SwitchParameter PrepareOnly { get; set; }
+
     [ServiceDependency]
     private ILogger<NewWtWingetPackage>? logger;
 
@@ -231,6 +244,7 @@ public partial class NewWtWingetPackage : DependencyCmdlet<Startup>
                     OverrideArguments = InstallerArguments,
                     InstallerType = PreferedInstaller,
                     PartialPackage = PartialPackage,
+                    PrepareOnly = PrepareOnly,
                     MsiProductCode = MsiProductCode,
                     MsiVersion = MsiVersion,
                     Versionless = versionless

@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Serialization.Json;
 using System.Runtime.InteropServices;
 using Winget.CommunityRepository.Models;
 using WingetIntune.Commands;
@@ -9,6 +11,12 @@ namespace WingetIntune.Tests.Intune;
 
 public class IntuneManagerTests
 {
+    static IntuneManagerTests()
+    {
+        ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
+        ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
+    }
+
     [Fact]
     public async Task GenerateMsiPackage_OtherPackage_ThrowsError()
     {
@@ -233,6 +241,124 @@ The Azure command-line interface (Azure CLI) is a set of commands used to create
         await intuneManager.DownloadInstallerAsync(folder, packageInfo, CancellationToken.None);
 
         //call.Received(1);
+    }
+
+    [Fact]
+    public async Task GenerateInstallerPackage_PrepareOnly_ExePackage_DownloadsToPackageFolder_SkipsPackaging()
+    {
+        var packageId = "Microsoft.PowerToys";
+        var version = "0.91.1";
+        var installerFilename = "PowerToysSetup-0.91.1-x64.exe";
+        var tempFolder = Path.Combine(Path.GetTempPath(), "intunewin-prepare");
+        var tempPackageFolder = Path.Combine(tempFolder, packageId, version);
+        var outputFolder = Path.Combine(Path.GetTempPath(), "packages-prepare");
+        var outputPackageFolder = Path.Combine(outputFolder, packageId, version);
+        var logoPath = Path.GetFullPath(Path.Combine(outputPackageFolder, "..", "logo.png"));
+        var installerPath = Path.Combine(outputPackageFolder, installerFilename);
+        var installerUrl = "https://github.com/microsoft/PowerToys/releases/download/v0.91.1/PowerToysSetup-0.91.1-x64.exe";
+        var installerHash = "AABBCC";
+
+        var packageInfo = new PackageInfo
+        {
+            PackageIdentifier = packageId,
+            DisplayName = "PowerToys (Preview)",
+            Version = version,
+            Source = PackageSource.Winget,
+            InstallerType = InstallerType.Exe,
+            InstallerContext = InstallerContext.System,
+            InstallerFilename = installerFilename,
+            InstallCommandLine = $"{installerFilename} /quiet /norestart",
+            UninstallCommandLine = "msiexec /x {ProductCode} /quiet",
+            Installers =
+            [
+                new WingetInstaller
+                {
+                    Architecture = "x64",
+                    Scope = "machine",
+                    InstallerType = "exe",
+                    InstallerUrl = installerUrl,
+                    InstallerSha256 = installerHash,
+                }
+            ],
+        };
+
+        var fileManager = Substitute.For<IFileManager>();
+        fileManager.CreateFolderForPackage(tempFolder, packageId, version, false).Returns(tempPackageFolder);
+        fileManager.CreateFolderForPackage(outputFolder, packageId, version, false).Returns(outputPackageFolder);
+        fileManager.DownloadFileAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        fileManager.WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        fileManager.WriteAllBytesAsync(Arg.Any<string>(), Arg.Any<byte[]>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        var intunePackager = Substitute.For<IIntunePackager>();
+
+        var intuneManager = new IntuneManager(new NullLoggerFactory(), fileManager, null, null, null, null, intunePackager, null, null, null, new ComputeBestInstallerForPackageCommand());
+
+        var result = await intuneManager.GenerateInstallerPackage(
+            tempFolder,
+            outputFolder,
+            packageInfo,
+            new PackageOptions { Architecture = Models.Architecture.X64, InstallerContext = InstallerContext.System, PrepareOnly = true },
+            CancellationToken.None);
+
+        // Installer should be downloaded directly to the output package folder
+        await fileManager.Received().DownloadFileAsync(installerUrl, installerPath, installerHash, true, false, Arg.Any<CancellationToken>());
+
+        // Packaging should NOT have been called
+        await intunePackager.DidNotReceive().CreatePackage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<PackageInfo>(), Arg.Any<bool>(), cancellationToken: Arg.Any<CancellationToken>());
+
+        // Result should reflect no package file
+        Assert.NotNull(result);
+        Assert.Null(result.PackageFile);
+        Assert.Equal(outputPackageFolder, result.PackageFolder);
+    }
+
+    [Fact]
+    public async Task GenerateMsiPackage_PrepareOnly_DownloadsToPackageFolder_SkipsPackaging()
+    {
+        var packageId = "Microsoft.AzureCLI";
+        var version = "2.51.0";
+        var tempFolder = Path.Combine(Path.GetTempPath(), "intunewin-msi-prepare");
+        var tempPackageFolder = Path.Combine(tempFolder, packageId, version);
+        var outputFolder = Path.Combine(Path.GetTempPath(), "packages-msi-prepare");
+        var outputPackageFolder = Path.Combine(outputFolder, packageId, version);
+        var installer = IntuneTestConstants.azureCliPackageInfo.Installers!.First();
+        var installerPath = Path.Combine(outputPackageFolder, installer.InstallerFilename!);
+        var logoPath = Path.GetFullPath(Path.Combine(outputPackageFolder, "..", "logo.png"));
+
+        var fileManager = Substitute.For<IFileManager>();
+        fileManager.CreateFolderForPackage(tempFolder, packageId, version, false).Returns(tempPackageFolder);
+        fileManager.CreateFolderForPackage(outputFolder, packageId, version, false).Returns(outputPackageFolder);
+        fileManager.DownloadFileAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        fileManager.WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        fileManager.WriteAllBytesAsync(Arg.Any<string>(), Arg.Any<byte[]>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        var intunePackager = Substitute.For<IIntunePackager>();
+
+        var intuneManager = new IntuneManager(new NullLoggerFactory(), fileManager, null, null, null, null, intunePackager, null, null, null, new ComputeBestInstallerForPackageCommand());
+
+        var result = await intuneManager.GenerateInstallerPackage(
+            tempFolder,
+            outputFolder,
+            IntuneTestConstants.azureCliPackageInfo,
+            new PackageOptions { Architecture = Models.Architecture.X64, InstallerContext = InstallerContext.User, PrepareOnly = true },
+            CancellationToken.None);
+
+        // Installer should be downloaded directly to the output package folder (not temp)
+        await fileManager.Received().DownloadFileAsync(installer.InstallerUrl!.ToString(), installerPath, null, true, false, Arg.Any<CancellationToken>());
+
+        // Packaging should NOT have been called
+        await intunePackager.DidNotReceive().CreatePackage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<PackageInfo>(), Arg.Any<bool>(), cancellationToken: Arg.Any<CancellationToken>());
+
+        // Result should reflect no package file
+        Assert.NotNull(result);
+        Assert.Null(result.PackageFile);
+        Assert.Equal(outputPackageFolder, result.PackageFolder);
     }
 
     [Fact]

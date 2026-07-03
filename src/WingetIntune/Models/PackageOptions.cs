@@ -9,6 +9,7 @@ public class PackageOptions
     public string? Locale { get; init; }
     public string? OverrideArguments { get; init; }
     public bool PartialPackage { get; init; }
+    public bool PrepareOnly { get; init; }
     public string? MsiProductCode { get; init; }
     public string? MsiVersion { get; init; }
     public bool Versionless { get; set; } = false;

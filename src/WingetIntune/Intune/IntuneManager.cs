@@ -70,9 +70,15 @@ public partial class IntuneManager
         LogGeneratePackage(packageInfo.PackageIdentifier!, packageInfo.Version!, packageInfo.Architecture, packageInfo.InstallerContext, outputFolder);
         var packageTempFolder = fileManager.CreateFolderForPackage(tempFolder, packageInfo.PackageIdentifier!, packageInfo.Version!);
         var packageFolder = fileManager.CreateFolderForPackage(outputFolder, packageInfo.PackageIdentifier!, packageInfo.Version!, packageInfo.Architecture == Architecture.Arm64);
-        var installerPath = await DownloadInstallerAsync(packageTempFolder, packageInfo, cancellationToken);
+        // When PrepareOnly, download directly to the output package folder so the user can customize it
+        var downloadFolder = packageOptions.PrepareOnly ? packageFolder : packageTempFolder;
+        var installerPath = await DownloadInstallerAsync(downloadFolder, packageInfo, cancellationToken);
         LoadMsiDetails(installerPath, ref packageInfo, packageOptions.OverrideArguments, packageOptions.MsiProductCode, packageOptions.MsiVersion);
-        var intunePackage = await intunePackager.CreatePackage(packageTempFolder, packageFolder, packageInfo.InstallerFilename!, packageInfo, packageOptions.PartialPackage, cancellationToken: cancellationToken);
+        string? intunePackage = null;
+        if (!packageOptions.PrepareOnly)
+        {
+            intunePackage = await intunePackager.CreatePackage(packageTempFolder, packageFolder, packageInfo.InstallerFilename!, packageInfo, packageOptions.PartialPackage, cancellationToken: cancellationToken);
+        }
         await DownloadLogoAsync(packageFolder, packageInfo.PackageIdentifier!, cancellationToken);
         await WriteReadmeAsync(packageFolder, packageInfo, cancellationToken);
         await WritePackageInfo(packageFolder, packageInfo, cancellationToken);
@@ -80,7 +86,7 @@ public partial class IntuneManager
         var command = packageInfo.InstallCommandLine!.Replace("msiexec /i ", "");
 
 
-        return new Models.WingetPackage(packageInfo, packageFolder, intunePackage!)
+        return new Models.WingetPackage(packageInfo, packageFolder, intunePackage)
         {
             InstallerArguments = command.Substring(command.IndexOf(packageInfo.InstallerFilename!) + packageInfo.InstallerFilename!.Length).Trim(),
             InstallerFile = packageInfo.InstallerFilename,
@@ -185,14 +191,30 @@ public partial class IntuneManager
         }
         else if (SupportedInstallers.Contains(packageInfo.InstallerType) && !packageOptions.PackageScript)
         {
-            _ = await DownloadInstallerAsync(packageTempFolder, packageInfo, cancellationToken);
+            if (packageOptions.PrepareOnly)
+            {
+                // Download directly to the output package folder so the user can customize it
+                _ = await DownloadInstallerAsync(packageFolder, packageInfo, cancellationToken);
+            }
+            else
+            {
+                _ = await DownloadInstallerAsync(packageTempFolder, packageInfo, cancellationToken);
+            }
         }
         else if (packageInfo.InstallerType == InstallerType.Zip &&
                  packageInfo.Installer?.NestedInstallerFiles?.Count > 0 &&
                  !packageOptions.PackageScript)
         {
-            var zipPath = await DownloadInstallerAsync(packageTempFolder, packageInfo, cancellationToken);
-            await fileManager.ExtractFileToFolderAsync(zipPath, packageTempFolder, cancellationToken);
+            if (packageOptions.PrepareOnly)
+            {
+                var zipPath = await DownloadInstallerAsync(packageFolder, packageInfo, cancellationToken);
+                await fileManager.ExtractFileToFolderAsync(zipPath, packageFolder, cancellationToken);
+            }
+            else
+            {
+                var zipPath = await DownloadInstallerAsync(packageTempFolder, packageInfo, cancellationToken);
+                await fileManager.ExtractFileToFolderAsync(zipPath, packageTempFolder, cancellationToken);
+            }
             packageInfo.InstallerFilename = packageInfo.Installer.NestedInstallerFiles.First().RelativeFilePath!;
         }
         else
@@ -235,7 +257,9 @@ public partial class IntuneManager
                 cancellationToken);
         }
 
-        var intuneFile = await intunePackager.CreatePackage(packageTempFolder, packageFolder, packageInfo.InstallerFilename!, packageInfo, packageOptions.PartialPackage, cancellationToken: cancellationToken);
+        var intuneFile = packageOptions.PrepareOnly
+            ? null
+            : await intunePackager.CreatePackage(packageTempFolder, packageFolder, packageInfo.InstallerFilename!, packageInfo, packageOptions.PartialPackage, cancellationToken: cancellationToken);
         await DownloadLogoAsync(packageFolder, packageInfo.PackageIdentifier!, cancellationToken);
 
         var detectionScript = IntuneManagerConstants.GetPsDetectionCommand(packageInfo.PackageIdentifier!, packageOptions.Versionless ? "" : packageInfo.Version!);
