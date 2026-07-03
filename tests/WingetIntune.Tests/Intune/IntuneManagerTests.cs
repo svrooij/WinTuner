@@ -13,6 +13,10 @@ public class IntuneManagerTests
 {
     static IntuneManagerTests()
     {
+        // Kiota JSON serializer must be registered before any test that calls WritePackageInfo,
+        // which uses KiotaSerializer.SerializeAsStream. In the full test suite this is done
+        // implicitly by WinTunerProxyClient construction in GraphStoreAppUploaderTests, but
+        // registering here makes IntuneManagerTests self-contained when run in isolation.
         ApiClientBuilder.RegisterDefaultSerializer<JsonSerializationWriterFactory>();
         ApiClientBuilder.RegisterDefaultDeserializer<JsonParseNodeFactory>();
     }
