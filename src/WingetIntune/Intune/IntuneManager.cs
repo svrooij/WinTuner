@@ -187,6 +187,14 @@ public partial class IntuneManager
         {
             _ = await DownloadInstallerAsync(packageTempFolder, packageInfo, cancellationToken);
         }
+        else if (packageInfo.InstallerType == InstallerType.Zip &&
+                 packageInfo.Installer?.NestedInstallerFiles?.Count > 0 &&
+                 !packageOptions.PackageScript)
+        {
+            var zipPath = await DownloadInstallerAsync(packageTempFolder, packageInfo, cancellationToken);
+            await fileManager.ExtractFileToFolderAsync(zipPath, packageTempFolder, cancellationToken);
+            packageInfo.InstallerFilename = packageInfo.Installer.NestedInstallerFiles.First().RelativeFilePath!;
+        }
         else
         {
             // Generate scripts

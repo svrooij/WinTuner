@@ -49,4 +49,51 @@ Installer:
         MsiProductCode = "{89E4C65D-96DD-435B-9BBB-EF1EAEF5B738}",
         MsiVersion = "2.51.0",
     };
+
+    internal static readonly PackageInfo adobeAcrobatZipPackageInfo = new PackageInfo
+    {
+        DisplayName = "Adobe Acrobat Pro",
+        PackageIdentifier = "Adobe.Acrobat.Pro",
+        Description = "Adobe Acrobat Pro PDF editor",
+        Version = "26.001.21662",
+        Source = PackageSource.Winget,
+        Publisher = "Adobe",
+        PublisherUrl = new Uri("https://www.adobe.com/"),
+        InstallerType = InstallerType.Zip,
+        InstallerContext = InstallerContext.System,
+        MsiProductCode = "{AC76BA86-1033-FFFF-7760-BC15014EA700}",
+        Installers = new List<Winget.CommunityRepository.Models.WingetInstaller>
+        {
+            new Winget.CommunityRepository.Models.WingetInstaller
+            {
+                Architecture = "x64",
+                Scope = "machine",
+                InstallerType = "zip",
+                NestedInstallerType = "exe",
+                NestedInstallerFiles = new List<Winget.CommunityRepository.Models.WingetNestedInstallerFile>
+                {
+                    new Winget.CommunityRepository.Models.WingetNestedInstallerFile
+                    {
+                        RelativeFilePath = @"Adobe Acrobat\setup.exe"
+                    }
+                },
+                InstallerUrl = "https://trials.adobe.com/AdobeProducts/APRO/Acrobat_HelpX/win32/Acrobat_DC_Web_x64_WWMUI.zip",
+                InstallerSha256 = "C310F060D303CFE6A8EC8DFE60B403CF659C25B50C0C2AE65BC4A146142AEAB2",
+                InstallerSwitches = new Winget.CommunityRepository.Models.WingetInstallerSwitches
+                {
+                    Silent = "/sAll /rs /msi",
+                    Custom = "EULA_ACCEPT=YES",
+                },
+                ProductCode = "{AC76BA86-1033-FFFF-7760-BC15014EA700}",
+                AppsAndFeaturesEntries = new List<Winget.CommunityRepository.Models.WingetAppsAndFeatures>
+                {
+                    new Winget.CommunityRepository.Models.WingetAppsAndFeatures
+                    {
+                        DisplayName = "Adobe Acrobat (64-bit)",
+                        ProductCode = "{AC76BA86-1033-FFFF-7760-BC15014EA700}",
+                    }
+                }
+            }
+        },
+    };
 }

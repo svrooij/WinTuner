@@ -125,6 +125,28 @@ public partial class ComputeBestInstallerForPackageCommand
                     if (package.MsiProductCode is not null)
                         package.UninstallCommandLine = $"Remove-AppxPackage -Package \"{package.MsiProductCode}\" -Confirm";
                     break;
+
+                case InstallerType.Zip:
+                    if (package.Installer?.NestedInstallerFiles?.Count > 0)
+                    {
+                        var nestedRelativePath = package.Installer.NestedInstallerFiles.First().RelativeFilePath!;
+                        var nestedType = EnumParsers.ParseInstallerType(package.Installer.NestedInstallerType);
+                        if (nestedType.IsMsi())
+                        {
+                            package.InstallCommandLine = $"msiexec /i \"{nestedRelativePath}\" {installerSwitches ?? "/qn /norestart"}";
+                            if (!string.IsNullOrEmpty(package.MsiProductCode))
+                                package.UninstallCommandLine = $"msiexec /x {package.MsiProductCode} /qn /norestart";
+                        }
+                        else
+                        {
+                            package.InstallCommandLine = string.IsNullOrEmpty(installerSwitches)
+                                ? $"\"{nestedRelativePath}\""
+                                : $"\"{nestedRelativePath}\" {installerSwitches}";
+                            if (!string.IsNullOrEmpty(package.MsiProductCode))
+                                package.UninstallCommandLine = $"msiexec /x {package.MsiProductCode} /qn /norestart";
+                        }
+                    }
+                    break;
             }
         }
 

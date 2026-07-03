@@ -234,4 +234,55 @@ The Azure command-line interface (Azure CLI) is a set of commands used to create
 
         //call.Received(1);
     }
+
+    [Fact]
+    public async Task GenerateInstallerPackage_ZipPackage_ExtractsAndPackagesNestedInstaller()
+    {
+        var packageId = "Adobe.Acrobat.Pro";
+        var version = "26.001.21662";
+        var tempFolder = Path.Combine(Path.GetTempPath(), "intunewin-zip");
+        var tempPackageFolder = Path.Combine(tempFolder, packageId, version);
+        var outputFolder = Path.Combine(Path.GetTempPath(), "packages-zip");
+        var outputPackageFolder = Path.Combine(outputFolder, packageId, version);
+
+        var packageInfo = IntuneTestConstants.adobeAcrobatZipPackageInfo;
+        var installer = packageInfo.Installers!.First();
+        var zipFilename = "Acrobat_DC_Web_x64_WWMUI.zip";
+        var zipInstallerPath = Path.Combine(tempPackageFolder, zipFilename);
+        var nestedInstallerRelativePath = @"Adobe Acrobat\setup.exe";
+        var logoPath = Path.GetFullPath(Path.Combine(outputPackageFolder, "..", "logo.png"));
+
+        var fileManager = Substitute.For<IFileManager>();
+        fileManager.CreateFolderForPackage(tempFolder, packageId, version, false).Returns(tempPackageFolder);
+        fileManager.CreateFolderForPackage(outputFolder, packageId, version, false).Returns(outputPackageFolder);
+        fileManager.DownloadFileAsync(installer.InstallerUrl!, zipInstallerPath, installer.InstallerSha256, true, false, Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        fileManager.ExtractFileToFolderAsync(zipInstallerPath, tempPackageFolder, Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        fileManager.DownloadFileAsync($"https://api.winstall.app/icons/{packageId}.png", logoPath, null, false, false, Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        fileManager.WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        fileManager.WriteAllBytesAsync(Arg.Any<string>(), Arg.Any<byte[]>(), Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
+        var intunePackager = Substitute.For<IIntunePackager>();
+        intunePackager.CreatePackage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<PackageInfo>(), Arg.Any<bool>(), cancellationToken: Arg.Any<CancellationToken>())
+            .Returns("setup.intunewin");
+
+        var intuneManager = new IntuneManager(new NullLoggerFactory(), fileManager, null, null, null, null, intunePackager, null, null, null, new ComputeBestInstallerForPackageCommand());
+
+        var result = await intuneManager.GenerateInstallerPackage(tempFolder, outputFolder, packageInfo, new PackageOptions { Architecture = Models.Architecture.X64, InstallerContext = InstallerContext.System }, CancellationToken.None);
+
+        // Verify the zip was downloaded
+        await fileManager.Received().DownloadFileAsync(installer.InstallerUrl!, zipInstallerPath, installer.InstallerSha256, true, false, Arg.Any<CancellationToken>());
+        // Verify the zip was extracted
+        await fileManager.Received().ExtractFileToFolderAsync(zipInstallerPath, tempPackageFolder, Arg.Any<CancellationToken>());
+        // Verify the package was created with the nested installer as setup file
+        await intunePackager.Received().CreatePackage(tempPackageFolder, outputPackageFolder, nestedInstallerRelativePath, Arg.Any<PackageInfo>(), Arg.Any<bool>(), cancellationToken: Arg.Any<CancellationToken>());
+        // Verify the install command does not use winget
+        Assert.NotNull(result);
+        Assert.DoesNotContain("winget", result.InstallerArguments ?? string.Empty);
+        Assert.Contains("setup.exe", result.InstallerArguments ?? string.Empty);
+    }
 }
