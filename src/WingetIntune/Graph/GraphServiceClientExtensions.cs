@@ -22,7 +22,7 @@ public static class GraphServiceClientExtensions
         var requestInfo = new RequestInformation
         {
             HttpMethod = Method.POST,
-            URI = new Uri($"https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/{win32LobAppId}/microsoft.graph.win32LobApp/contentVersions"),
+            URI = new Uri($"{graphServiceClient.RequestAdapter.BaseUrl}/deviceAppManagement/mobileApps/{win32LobAppId}/microsoft.graph.win32LobApp/contentVersions"),
         };
         requestInfo.Headers.Add("Content-Type", "application/json");
         requestInfo.Content = new MemoryStream(Encoding.UTF8.GetBytes("{}"));
@@ -41,7 +41,7 @@ public static class GraphServiceClientExtensions
         var requestInfo = new RequestInformation
         {
             HttpMethod = Method.POST,
-            URI = new Uri($"https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/{win32LobAppId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files"),
+            URI = new Uri($"{graphServiceClient.RequestAdapter.BaseUrl}/deviceAppManagement/mobileApps/{win32LobAppId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files"),
         };
         requestInfo.SetContentFromParsable(graphServiceClient.RequestAdapter, "application/json", mobileAppContentFile);
         return graphServiceClient.RequestAdapter.SendAsync<MobileAppContentFile>(requestInfo, MobileAppContentFile.CreateFromDiscriminatorValue, errorMapping: ErrorMapping, cancellationToken: cancellationToken);
@@ -58,7 +58,7 @@ public static class GraphServiceClientExtensions
         var requestInfo = new RequestInformation
         {
             HttpMethod = Method.GET,
-            URI = new Uri($"https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/{win32LobAppId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files/{mobileAppContentFileId}"),
+            URI = new Uri($"{graphServiceClient.RequestAdapter.BaseUrl}/deviceAppManagement/mobileApps/{win32LobAppId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files/{mobileAppContentFileId}"),
         };
         return graphServiceClient.RequestAdapter.SendAsync<MobileAppContentFile>(requestInfo, MobileAppContentFile.CreateFromDiscriminatorValue, errorMapping: ErrorMapping, cancellationToken: cancellationToken);
     }
@@ -115,7 +115,7 @@ public static class GraphServiceClientExtensions
         {
             HttpMethod = Method.POST,
             Content = new MemoryStream(data),
-            URI = new Uri($"https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/{win32LobAppId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files/{mobileAppContentFileId}/commit"),
+            URI = new Uri($"{graphServiceClient.RequestAdapter.BaseUrl}/deviceAppManagement/mobileApps/{win32LobAppId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files/{mobileAppContentFileId}/commit"),
         };
         requestInfo.Headers.Add("Content-Type", "application/json");
         return graphServiceClient.RequestAdapter.SendNoContentAsync(requestInfo, errorMapping: ErrorMapping, cancellationToken: cancellationToken);

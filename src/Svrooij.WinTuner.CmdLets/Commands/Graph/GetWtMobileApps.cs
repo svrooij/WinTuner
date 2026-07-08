@@ -63,7 +63,7 @@ public partial class GetWtMobileApps : BaseIntuneCmdlet
     {
         logger.LogInformation("Getting MobileApps with name: {NameFiler}, isAssigned: {IsAssigned}", NameContains, IsAssigned);
 
-        var graphServiceClient = gcf.CreateClient(provider);
+        var graphServiceClient = gcf.CreateClient(provider, ConnectWtWinTuner.GraphEndpoint.GraphBetaEndpoint);
         proxyClient?.TriggerEvent(
             sessionId: ConnectWtWinTuner.SessionId,
             command: nameof(GetWtMobileApps),

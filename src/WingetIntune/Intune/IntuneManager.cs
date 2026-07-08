@@ -693,6 +693,7 @@ public partial class IntuneManager
 
     private GraphServiceClient CreateGraphClientFromOptions(IntunePublishOptions options)
     {
+        var graphEndpoint = GraphCloudEnvironments.Global;
         IAuthenticationProvider provider = publicClient;
         if (!string.IsNullOrEmpty(options.Username) || !string.IsNullOrEmpty(options.Tenant))
         {
@@ -700,13 +701,13 @@ public partial class IntuneManager
         }
         if (options.Credential is not null)
         {
-            provider = new Microsoft.Graph.Authentication.AzureIdentityAuthenticationProvider(options.Credential, null, null, isCaeEnabled: false, RequiredScopes);
+            provider = new Microsoft.Graph.Authentication.AzureIdentityAuthenticationProvider(options.Credential, graphEndpoint.AllowedHosts, null, isCaeEnabled: false, RequiredScopes);
         }
         else if (!string.IsNullOrEmpty(options.Token))
         {
             provider = new StaticAuthenticationProvider(options.Token);
         }
-        return new GraphServiceClient(httpClient, provider, "https://graph.microsoft.com/beta");
+        return new GraphServiceClient(httpClient, provider, graphEndpoint.GraphBetaEndpoint);
     }
 
     [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "Generating IntuneWin package for {PackageId} {Version} {Architecture} {Context} in {OutputFolder}")]

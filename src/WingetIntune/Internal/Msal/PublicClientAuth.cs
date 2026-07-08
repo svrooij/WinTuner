@@ -5,6 +5,7 @@ using Microsoft.Identity.Client.Broker;
 using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
+using WingetIntune.Graph;
 
 namespace WingetIntune.Internal.Msal;
 
@@ -12,6 +13,7 @@ public partial class PublicClientAuth : IAuthenticationProvider, IDisposable
 {
     private readonly PublicClientOptions _options;
     private readonly IPublicClientApplication publicClientApplication;
+    private readonly GraphCloudEndpoint graphEndpoint;
     private readonly ILogger<PublicClientAuth> logger;
     private bool CacheLoaded = false;
     private const string DefaultClientId = "d5a8a406-3b1d-4069-91cc-d76acdd812fe";
@@ -32,10 +34,13 @@ public partial class PublicClientAuth : IAuthenticationProvider, IDisposable
             _options = options.Value;
         }
 
+        graphEndpoint = GraphCloudEnvironments.GetEndpoint(_options.Environment);
+
         if (_options.UseBroker)
         {
             publicClientApplication = PublicClientApplicationBuilder
                 .Create(_options.ClientId)
+                .WithAuthority(graphEndpoint.GetAuthority())
                 .WithDefaultRedirectUri()
                 .WithBroker(new BrokerOptions(BrokerOptions.OperatingSystems.Windows) { Title = "Winget Intune uploader" })
                 .Build();
@@ -44,7 +49,7 @@ public partial class PublicClientAuth : IAuthenticationProvider, IDisposable
         {
             publicClientApplication = PublicClientApplicationBuilder
                 .Create(_options.ClientId)
-                .WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithAuthority(graphEndpoint.GetAuthority())
                 .WithDefaultRedirectUri()
                 .Build();
         }
@@ -141,7 +146,7 @@ public partial class PublicClientAuth : IAuthenticationProvider, IDisposable
         if (request is null)
             throw new ArgumentNullException(nameof(request));
 
-        if (request.URI.Host == "graph.microsoft.com")
+        if (request.URI.Host.Equals(graphEndpoint.GraphHost, StringComparison.OrdinalIgnoreCase))
         {
             var token = await AccuireTokenAsync(Scopes, accountSuggestion?.TenantId, accountSuggestion?.Username, cancellationToken);
             var headers = new RequestHeaders
@@ -169,6 +174,7 @@ public class PublicClientOptions
 {
     public string? ClientId { get; set; }
     public bool UseBroker { get; set; } = true;
+    public GraphCloudEnvironment Environment { get; set; } = GraphCloudEnvironment.Global;
 }
 
 public record AccountSuggestion(string? TenantId, string? Username);

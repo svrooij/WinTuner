@@ -273,7 +273,7 @@ public partial class DeployWtWin32App : BaseIntuneCmdlet
         }
 
         logger?.LogInformation("Uploading Win32App {DisplayName} to Intune with file {IntuneWinFile}", App!.DisplayName, IntuneWinFile);
-        var graphServiceClient = gcf!.CreateClient(provider);
+        var graphServiceClient = gcf!.CreateClient(provider, ConnectWtWinTuner.GraphEndpoint.GraphBetaEndpoint);
 
         if (IntuneWinFile is null)
         {

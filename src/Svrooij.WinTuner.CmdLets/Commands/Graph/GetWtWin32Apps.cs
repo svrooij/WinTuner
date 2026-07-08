@@ -89,7 +89,7 @@ public partial class GetWtWin32Apps : BaseIntuneCmdlet
         logger?.LogInformation("Getting list of published apps");
 
 
-        var graphServiceClient = gcf!.CreateClient(provider);
+        var graphServiceClient = gcf!.CreateClient(provider, ConnectWtWinTuner.GraphEndpoint.GraphBetaEndpoint);
         proxyClient?.TriggerEvent(
             sessionId: ConnectWtWinTuner.SessionId,
             command: nameof(GetWtWin32Apps),

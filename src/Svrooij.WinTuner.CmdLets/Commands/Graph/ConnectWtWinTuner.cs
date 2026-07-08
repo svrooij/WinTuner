@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using WingetIntune.Graph;
 
 namespace Svrooij.WinTuner.CmdLets.Commands.Graph;
 /// <summary>
@@ -61,7 +62,6 @@ namespace Svrooij.WinTuner.CmdLets.Commands.Graph;
 public class ConnectWtWinTuner : DependencyCmdlet<Startup>
 {
     private const string DefaultClientId = "d5a8a406-3b1d-4069-91cc-d76acdd812fe";
-    private const string DefaultClientCredentialScope = "https://graph.microsoft.com/.default";
     private const string ParamSetInteractive = "Interactive";
     private const string ParamSetClientCredentials = "ClientCredentials";
     private const string ParamSetClientCertificateCredentials = "ClientCertificateCredentials";
@@ -74,6 +74,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
     internal static IAuthenticationProvider? AuthenticationProvider { get; private set; }
     internal static string? SessionId { get; private set; }
     internal static string AppVersion { get; } = typeof(ConnectWtWinTuner).Assembly.GetName().Version?.ToString() ?? "1.0.0";
+    internal static GraphCloudEndpoint GraphEndpoint { get; private set; } = GraphCloudEnvironments.Global;
 
     /// <summary>
     /// Use a managed identity to connect to Intune
@@ -85,7 +86,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
         HelpMessage = "Use a managed identity to connect to Intune")]
-    public SwitchParameter UseManagedIdentity { get; set; } = Environment.GetEnvironmentVariable("AZURE_USE_MANAGED_IDENTITY")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
+    public SwitchParameter UseManagedIdentity { get; set; } = System.Environment.GetEnvironmentVariable("AZURE_USE_MANAGED_IDENTITY")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
 
     /// <summary>
     /// Use default Azure Credentials from Azure.Identity to connect to Intune
@@ -97,7 +98,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
         HelpMessage = "Use default Azure Credentials from Azure.Identity to connect to Intune")]
-    public SwitchParameter UseDefaultCredentials { get; set; } = Environment.GetEnvironmentVariable("AZURE_USE_DEFAULT_CREDENTIALS")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
+    public SwitchParameter UseDefaultCredentials { get; set; } = System.Environment.GetEnvironmentVariable("AZURE_USE_DEFAULT_CREDENTIALS")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
 
     /// <summary>
     /// Use a token from another source to connect to Intune
@@ -109,7 +110,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
         HelpMessage = "Use a token from another source to connect to Intune, this is the least preferred way to use")]
-    public string? Token { get; set; } = Environment.GetEnvironmentVariable("AZURE_TOKEN");
+    public string? Token { get; set; } = System.Environment.GetEnvironmentVariable("AZURE_TOKEN");
 
     /// <summary>
     /// 
@@ -159,7 +160,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
         HelpMessage = "Specify the tenant ID. Loaded from `AZURE_TENANT_ID`")]
-    public string? TenantId { get; set; } = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
+    public string? TenantId { get; set; } = System.Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
 
     /// <summary>
     /// 
@@ -185,7 +186,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
         HelpMessage = "Specify the alternative client ID, optional. Loaded from `AZURE_CLIENT_ID`")]
-    public string? ClientId { get; set; } = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
+    public string? ClientId { get; set; } = System.Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
 
 
     /// <summary>
@@ -198,7 +199,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
                ValueFromPipeline = false,
                ValueFromPipelineByPropertyName = false,
                HelpMessage = "Specify the client secret. Loaded from `AZURE_CLIENT_SECRET`")]
-    public string? ClientSecret { get; set; } = Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
+    public string? ClientSecret { get; set; } = System.Environment.GetEnvironmentVariable("AZURE_CLIENT_SECRET");
 
     /// <summary>
     /// Certificate Thumbprint for client authentication
@@ -209,7 +210,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
                 ParameterSetName = ParamSetClientCertificateCredentials,
                 ValueFromPipeline = false,
                 HelpMessage = "Specify the thumbprint of the certificate. Loaded from `AZURE_CLIENT_CERT_THUMBPRINT`")]
-    public string? ClientCertificateThumbprint { get; set; } = Environment.GetEnvironmentVariable("AZURE_CLIENT_CERT_THUMBPRINT");
+    public string? ClientCertificateThumbprint { get; set; } = System.Environment.GetEnvironmentVariable("AZURE_CLIENT_CERT_THUMBPRINT");
 
     /// <summary>
     /// Specify scopes to use
@@ -220,28 +221,28 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
         ParameterSetName = ParamSetClientCredentials,
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
-        HelpMessage = "Specify the scopes to request, default is `https://graph.microsoft.com/.default`")]
+        HelpMessage = "Specify the scopes to request, default is the selected Microsoft Graph cloud `.default` scope")]
     [Parameter(
         Mandatory = false,
         Position = 10,
         ParameterSetName = nameof(UseDefaultCredentials),
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
-        HelpMessage = "Specify the scopes to request, default is `https://graph.microsoft.com/.default`")]
+        HelpMessage = "Specify the scopes to request, default is the selected Microsoft Graph cloud `.default` scope")]
     [Parameter(
         Mandatory = false,
         Position = 10,
         ParameterSetName = nameof(UseManagedIdentity),
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
-        HelpMessage = "Specify the scopes to request, default is `https://graph.microsoft.com/.default`")]
+        HelpMessage = "Specify the scopes to request, default is the selected Microsoft Graph cloud `.default` scope")]
     [Parameter(
         Mandatory = false,
         Position = 10,
         ParameterSetName = ParamSetClientCertificateCredentials,
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
-        HelpMessage = "Specify the scopes to request, default is `https://graph.microsoft.com/.default`")]
+        HelpMessage = "Specify the scopes to request, default is the selected Microsoft Graph cloud `.default` scope")]
     [Parameter(
         Mandatory = false,
         Position = 10,
@@ -249,7 +250,14 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
         ValueFromPipeline = false,
         ValueFromPipelineByPropertyName = false,
         HelpMessage = "Specify the scopes to request, default is `DeviceManagementConfiguration.ReadWrite.All`, `DeviceManagementApps.ReadWrite.All`")]
-    public string[]? Scopes { get; set; } = Environment.GetEnvironmentVariable("AZURE_SCOPES")?.Split(' ');
+    public string[]? Scopes { get; set; } = System.Environment.GetEnvironmentVariable("AZURE_SCOPES")?.Split(' ');
+
+    /// <summary>
+    /// Select the Microsoft Graph cloud environment.
+    /// </summary>
+    [Parameter(Mandatory = false, Position = 12, HelpMessage = "Microsoft Graph cloud environment. Use USGov for GCC High.")]
+    [ValidateSet("Global", "USGov", "GCCHigh", "USGovDoD", "DoD", "China")]
+    public string Environment { get; set; } = System.Environment.GetEnvironmentVariable("WINTUNER_ENVIRONMENT") ?? "Global";
 
     /// <summary>
     /// Immediately try to get a token.
@@ -267,6 +275,8 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
     public override async Task ProcessRecordAsync(CancellationToken cancellationToken)
     {
         SessionId ??= Guid.NewGuid().ToString();
+        GraphEndpoint = GraphCloudEnvironments.GetEndpoint(Environment);
+        ValidateClientIdForCloud();
         _logger?.LogInformation("Connecting to Intune using {ParameterSetName}", ParameterSetName);
         AuthenticationProvider = CreateAuthenticationProvider(cancellationToken);
 
@@ -286,15 +296,23 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
             return new WingetIntune.Internal.Msal.StaticAuthenticationProvider(Token);
         }
 
-        var scope = (Scopes ?? DefaultScopes)[0];
+        var graphEndpoint = GraphEndpoint;
+        var clientCredentialScopes = Scopes ?? new[] { graphEndpoint.DefaultClientCredentialScope };
+        var delegatedScopes = Scopes ?? DefaultScopes;
 
         if (UseManagedIdentity || UseDefaultCredentials)
         {
             // Maybe make which credentials to use configurable
             Azure.Core.TokenCredential credentials = UseManagedIdentity
-                ? new Azure.Identity.ManagedIdentityCredential(ClientId)
-                : new Azure.Identity.DefaultAzureCredential();
-            return new Microsoft.Graph.Authentication.AzureIdentityAuthenticationProvider(credentials, null, null, isCaeEnabled: false, DefaultClientCredentialScope);
+                ? new Azure.Identity.ManagedIdentityCredential(ClientId, new Azure.Identity.ManagedIdentityCredentialOptions
+                {
+                    AuthorityHost = graphEndpoint.AuthorityHost,
+                })
+                : new Azure.Identity.DefaultAzureCredential(new Azure.Identity.DefaultAzureCredentialOptions
+                {
+                    AuthorityHost = graphEndpoint.AuthorityHost,
+                });
+            return new Microsoft.Graph.Authentication.AzureIdentityAuthenticationProvider(credentials, graphEndpoint.AllowedHosts, null, isCaeEnabled: false, scopes: clientCredentialScopes);
         }
 
         if (ParameterSetName == ParamSetClientCredentials)
@@ -306,12 +324,13 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
                     new Azure.Identity.ClientSecretCredential(TenantId, ClientId, ClientSecret,
                         new Azure.Identity.ClientSecretCredentialOptions
                         {
+                            AuthorityHost = graphEndpoint.AuthorityHost,
                             TokenCachePersistenceOptions = new Azure.Identity.TokenCachePersistenceOptions
                             {
                                 Name = "WinTuner-PowerShell-CC",
                                 UnsafeAllowUnencryptedStorage = true,
                             }
-                        }), isCaeEnabled: false, scopes: DefaultClientCredentialScope);
+                        }), allowedHosts: graphEndpoint.AllowedHosts, isCaeEnabled: false, scopes: clientCredentialScopes);
             }
             else
             {
@@ -345,13 +364,14 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
                     new Azure.Identity.ClientCertificateCredential(TenantId, ClientId, certificate,
                         new Azure.Identity.ClientCertificateCredentialOptions
                         {
+                            AuthorityHost = graphEndpoint.AuthorityHost,
                             TokenCachePersistenceOptions = new Azure.Identity.TokenCachePersistenceOptions
                             {
                                 Name = "WinTuner-PowerShell-CC",
                                 UnsafeAllowUnencryptedStorage = true,
                             }
                         }
-                    ), isCaeEnabled: false, scopes: DefaultClientCredentialScope);
+                    ), allowedHosts: graphEndpoint.AllowedHosts, isCaeEnabled: false, scopes: clientCredentialScopes);
 
             }
             else
@@ -371,6 +391,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
                     ClientId = ClientId ?? DefaultClientId,
                     LoginHint = Username,
                     RedirectUri = new Uri("http://localhost:12228/"),
+                    AuthorityHost = graphEndpoint.AuthorityHost,
                     TokenCachePersistenceOptions = new Azure.Identity.TokenCachePersistenceOptions
                     {
                         Name = "WinTuner-PowerShell",
@@ -387,7 +408,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
                 // This will trigger the login screen early in the process.
                 //var result = credential.Authenticate(new Azure.Core.TokenRequestContext(scopes!, tenantId: TenantId), cancellationToken);
 
-                return new Microsoft.Graph.Authentication.AzureIdentityAuthenticationProvider(credential, isCaeEnabled: false, scopes: Scopes ?? DefaultScopes);
+                return new Microsoft.Graph.Authentication.AzureIdentityAuthenticationProvider(credential, allowedHosts: graphEndpoint.AllowedHosts, isCaeEnabled: false, scopes: delegatedScopes);
             }
 
             return new WingetIntune.Internal.Msal.InteractiveAuthenticationProvider(new WingetIntune.Internal.Msal.InteractiveAuthenticationProviderOptions
@@ -395,7 +416,8 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
                 ClientId = ClientId,
                 TenantId = TenantId,
                 Username = Username,
-                Scopes = Scopes ?? DefaultScopes,
+                Scopes = delegatedScopes,
+                Environment = graphEndpoint.Environment,
             });
         }
 
@@ -416,7 +438,7 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
             throw new InvalidOperationException("AuthenticationProvider is not set, please run Connect-WtWinTuner first.");
         }
         // This is a "hack" to get a token from the authentication provider.
-        var ri = new RequestInformation(Method.GET, "https://graph.microsoft.com/test", new Dictionary<string, object>());
+        var ri = new RequestInformation(Method.GET, GraphEndpoint.TestEndpoint, new Dictionary<string, object>());
         await AuthenticationProvider.AuthenticateRequestAsync(ri, cancellationToken: cancellationToken);
         string? headerValue = ri.Headers.TryGetValue("Authorization", out var values) ? values.FirstOrDefault() : null;
 
@@ -437,4 +459,14 @@ public class ConnectWtWinTuner : DependencyCmdlet<Startup>
     }
 
     private const string AuthenticationScheme = "Bearer";
+
+    private void ValidateClientIdForCloud()
+    {
+        if (GraphEndpoint.Environment != GraphCloudEnvironment.Global &&
+            ParameterSetName == ParamSetInteractive &&
+            string.IsNullOrWhiteSpace(ClientId))
+        {
+            throw new ArgumentException($"A ClientId from an app registration in {GraphEndpoint.DisplayName} is required for interactive authentication.", nameof(ClientId));
+        }
+    }
 }

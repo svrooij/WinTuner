@@ -37,6 +37,37 @@ public class GraphServiceExtensionsTests
     }
 
     [Fact]
+    public async Task Intune_CreateWin32LobAppContentVersionAsync_UsesConfiguredGraphBaseUrl()
+    {
+        var appId = Guid.NewGuid().ToString();
+        var token = Guid.NewGuid().ToString();
+
+        var handler = Substitute.For<HttpMessageHandlerWrapper>();
+
+        var response = new HttpResponseMessage(HttpStatusCode.Created);
+        response.Content = new StringContent(@"{
+  ""@odata.type"": ""#microsoft.graph.mobileAppContent"",
+  ""id"": ""1""
+}");
+        response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+        handler.AddFakeResponse(
+            $"https://graph.microsoft.us/beta/deviceAppManagement/mobileApps/{appId}/microsoft.graph.win32LobApp/contentVersions",
+            HttpMethod.Post,
+            "{}",
+            response);
+
+        var httpClient = new HttpClient(handler);
+        var graphServiceClient = new GraphServiceClient(
+            httpClient,
+            new WingetIntune.Internal.Msal.StaticAuthenticationProvider(token),
+            GraphCloudEnvironments.USGov.GraphBetaEndpoint);
+
+        var result = await graphServiceClient.Intune_CreateWin32LobAppContentVersionAsync(appId, CancellationToken.None)!;
+        Assert.Equal("1", result!.Id);
+    }
+
+    [Fact]
     public async Task Intune_CreateWin32LobAppContentVersionFileAsync_MakesCorrectRequest()
     {
         var appId = Guid.NewGuid().ToString();

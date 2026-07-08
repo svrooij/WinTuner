@@ -144,7 +144,7 @@ public partial class DeployWtMsStoreApp : BaseIntuneCmdlet
 
         logger!.LogInformation("Uploading MSStore app {PackageId} to Intune", PackageId);
         proxyClient?.TriggerEvent(ConnectWtWinTuner.SessionId, nameof(DeployWtMsStoreApp), appVersion: ConnectWtWinTuner.AppVersion, packageId: PackageId, cancellationToken: CancellationToken.None);
-        var graphServiceClient = gcf!.CreateClient(provider);
+        var graphServiceClient = gcf!.CreateClient(provider, ConnectWtWinTuner.GraphEndpoint.GraphBetaEndpoint);
         try
         {
             var app = await graphStoreAppUploader!.CreateStoreAppAsync(graphServiceClient, PackageId!, cancellationToken);

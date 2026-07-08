@@ -6,6 +6,7 @@ using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 using System.Runtime.InteropServices;
+using WingetIntune.Graph;
 
 namespace WingetIntune.Internal.Msal;
 
@@ -13,6 +14,7 @@ public sealed class InteractiveAuthenticationProvider : IAuthenticationProvider,
 {
     private readonly InteractiveAuthenticationProviderOptions _options;
     private readonly IPublicClientApplication publicClientApplication;
+    private readonly GraphCloudEndpoint graphEndpoint;
     private bool CacheLoaded = false;
     private const string DefaultClientId = "d5a8a406-3b1d-4069-91cc-d76acdd812fe";
     private AuthenticationResult? authenticationResult;
@@ -28,6 +30,7 @@ public sealed class InteractiveAuthenticationProvider : IAuthenticationProvider,
 
 
         _options = options;
+        graphEndpoint = GraphCloudEnvironments.GetEndpoint(_options.Environment);
         if (string.IsNullOrWhiteSpace(options.ClientId))
         {
             _options.ClientId = DefaultClientId;
@@ -35,16 +38,8 @@ public sealed class InteractiveAuthenticationProvider : IAuthenticationProvider,
 
         var builder = PublicClientApplicationBuilder
             .Create(_options.ClientId)
+            .WithAuthority(graphEndpoint.GetAuthority(_options.TenantId))
             .WithDefaultRedirectUri();
-
-        if (!string.IsNullOrWhiteSpace(_options.TenantId))
-        {
-            builder.WithTenantId(_options.TenantId);
-        }
-        else
-        {
-            builder.WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdMultipleOrgs);
-        }
 
         if (_options.UseBroker)
         {
@@ -132,7 +127,7 @@ public sealed class InteractiveAuthenticationProvider : IAuthenticationProvider,
         if (request is null)
             throw new ArgumentNullException(nameof(request));
 
-        if (request.URI.Host == "graph.microsoft.com")
+        if (request.URI.Host.Equals(graphEndpoint.GraphHost, StringComparison.OrdinalIgnoreCase))
         {
             var token = await AccuireTokenAsync(_options.Scopes!, _options.TenantId, _options.Username, cancellationToken);
             var headers = new RequestHeaders
@@ -156,4 +151,5 @@ public class InteractiveAuthenticationProviderOptions
     public string? Username { get; set; }
     public string? ClientId { get; set; }
     public string? TenantId { get; set; }
+    public GraphCloudEnvironment Environment { get; set; } = GraphCloudEnvironment.Global;
 }
