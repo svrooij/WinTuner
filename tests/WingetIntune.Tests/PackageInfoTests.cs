@@ -38,5 +38,91 @@ namespace WingetIntune.Tests
             var containsSecondLine = info.Description!.Contains("PowerShell commands let you manage computers from the command line.");
             Assert.True(containsSecondLine, "Contains second line");
         }
+
+        [Fact]
+        public void GetBestInstaller_ZipWithNestedWix_WixPreference_ReturnsZipInstaller()
+        {
+            // Arrange: a package with only a zip installer wrapping a wix installer
+            var packageInfo = new PackageInfo
+            {
+                PackageIdentifier = "dotPDN.PaintDotNet",
+                Version = "5.1.12",
+                Source = PackageSource.Winget,
+                Installers = new List<Winget.CommunityRepository.Models.WingetInstaller>
+                {
+                    new Winget.CommunityRepository.Models.WingetInstaller
+                    {
+                        Architecture = "x64",
+                        Scope = "machine",
+                        InstallerType = "zip",
+                        NestedInstallerType = "wix",
+                        NestedInstallerFiles = new List<Winget.CommunityRepository.Models.WingetNestedInstallerFile>
+                        {
+                            new Winget.CommunityRepository.Models.WingetNestedInstallerFile
+                            {
+                                RelativeFilePath = "PaintDotNet.msi"
+                            }
+                        },
+                        InstallerUrl = "https://github.com/paintdotnet/release/releases/download/v5.1.12/paint.net.5.1.12.zip",
+                        InstallerSha256 = "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+                    }
+                }
+            };
+
+            var packageOptions = new PackageOptions
+            {
+                Architecture = Architecture.X64,
+                InstallerContext = InstallerContext.System,
+                InstallerType = InstallerType.Wix,
+            };
+
+            // Act
+            var installer = packageInfo.GetBestInstaller(packageOptions);
+
+            // Assert: the zip installer (with nested wix) should be selected
+            Assert.NotNull(installer);
+            Assert.Equal("zip", installer.InstallerType);
+            Assert.Equal("wix", installer.NestedInstallerType);
+        }
+
+        [Fact]
+        public void GetBestInstaller_ZipWithNestedWix_DefaultMsiPreference_ReturnsZipInstaller()
+        {
+            // Arrange: a package with only a zip installer wrapping a wix installer
+            var packageInfo = new PackageInfo
+            {
+                PackageIdentifier = "dotPDN.PaintDotNet",
+                Version = "5.1.12",
+                Source = PackageSource.Winget,
+                Installers = new List<Winget.CommunityRepository.Models.WingetInstaller>
+                {
+                    new Winget.CommunityRepository.Models.WingetInstaller
+                    {
+                        Architecture = "x64",
+                        Scope = "machine",
+                        InstallerType = "zip",
+                        NestedInstallerType = "wix",
+                        NestedInstallerFiles = new List<Winget.CommunityRepository.Models.WingetNestedInstallerFile>
+                        {
+                            new Winget.CommunityRepository.Models.WingetNestedInstallerFile
+                            {
+                                RelativeFilePath = "PaintDotNet.msi"
+                            }
+                        },
+                        InstallerUrl = "https://github.com/paintdotnet/release/releases/download/v5.1.12/paint.net.5.1.12.zip",
+                        InstallerSha256 = "AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899",
+                    }
+                }
+            };
+
+            // Default options look for Msi; wix-nested-zip should also match since wix IsMsi()
+            var packageOptions = PackageOptions.Create(); // InstallerType defaults to Msi
+
+            // Act
+            var installer = packageInfo.GetBestInstaller(packageOptions);
+
+            // Assert: the zip installer (with nested wix) should be selected via fallback to Unknown
+            Assert.NotNull(installer);
+        }
     }
 }

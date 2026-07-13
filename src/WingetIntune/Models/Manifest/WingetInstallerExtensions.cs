@@ -12,10 +12,22 @@ internal static class WingetInstallerExtensions
     private static Winget.CommunityRepository.Models.WingetInstaller? singleOrDefault(this IList<Winget.CommunityRepository.Models.WingetInstaller> installers, InstallerType installerType, Architecture architecture, InstallerContext installerContext, string? locale = null)
     {
         return installers.FirstOrDefault(i =>
-            (i.ParseInstallerType() == installerType || installerType == InstallerType.Unknown)
+            InstallerTypeMatches(i, installerType)
             && (i.InstallerArchitecture() == architecture || (architecture == Architecture.Unknown && i.InstallerArchitecture() == Architecture.X64))
             && (i.ParseInstallerContext() == installerContext || installerContext == InstallerContext.Unknown)
             && (string.IsNullOrWhiteSpace(locale) || i.InstallerLocale == locale));
+    }
+
+    private static bool InstallerTypeMatches(Winget.CommunityRepository.Models.WingetInstaller installer, InstallerType requestedType)
+    {
+        if (requestedType == InstallerType.Unknown)
+            return true;
+        if (installer.ParseInstallerType() == requestedType)
+            return true;
+        // For zip installers, also match by NestedInstallerType (e.g., zip + wix matches a Wix preference)
+        return installer.ParseInstallerType() == InstallerType.Zip
+            && !string.IsNullOrEmpty(installer.NestedInstallerType)
+            && EnumParsers.ParseInstallerType(installer.NestedInstallerType) == requestedType;
     }
 
 
