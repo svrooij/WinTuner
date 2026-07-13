@@ -263,7 +263,7 @@ InstallModes:
 Installers:
 - Architecture: x64
   InstallerUrl: https://github.com/paintdotnet/release/releases/download/v5.1.12/paint.net.5.1.12.zip
-  InstallerSha256: AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899
+  InstallerSha256: AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899 # fake hash for test purposes
 ManifestType: installer
 ManifestVersion: 1.6.0";
 
