@@ -163,6 +163,39 @@ namespace WingetIntune.Tests
         }
 
         [Fact]
+        public async Task GetPackageInfoAsync_ZipWithNestedWixInstaller_ReturnsZipInstallerType()
+        {
+            var packageId = "dotPDN.PaintDotNet";
+            var version = "5.1.12";
+            var source = "winget";
+            var processManager = Substitute.For<IProcessManager>();
+            var filemanagerMock = Substitute.For<IFileManager>();
+            filemanagerMock.DownloadStringAsync(WingetManager.CreateManifestUri(packageId, version, null), true, Arg.Any<CancellationToken>())
+                .Returns(WingetManagerTestConstants.paintDotNetYaml);
+            filemanagerMock.DownloadStringAsync(WingetManager.CreateManifestUri(packageId, version, ".installer"), true, Arg.Any<CancellationToken>())
+                .Returns(WingetManagerTestConstants.paintDotNetInstallYaml);
+            filemanagerMock.DownloadStringAsync(WingetManager.CreateManifestUri(packageId, version, ".locale.en-US"), true, Arg.Any<CancellationToken>())
+                .Returns(WingetManagerTestConstants.paintDotNetLocaleYaml);
+
+            var wingetManager = new WingetManager(logger, processManager, filemanagerMock);
+            var info = await wingetManager.GetPackageInfoAsync(packageId, version, source);
+
+            Assert.Equal(packageId, info.PackageIdentifier);
+            Assert.Equal(version, info.Version);
+            Assert.Equal(InstallerType.Zip, info.InstallerType);
+            Assert.NotEmpty(info.Installers!);
+
+            // Verify NestedInstallerType was propagated to the installer
+            var installer = info.Installers!.First();
+            Assert.Equal("zip", installer.InstallerType);
+            Assert.Equal("wix", installer.NestedInstallerType);
+            Assert.NotNull(installer.NestedInstallerFiles);
+            Assert.Single(installer.NestedInstallerFiles!);
+            Assert.Equal("PaintDotNet.msi", installer.NestedInstallerFiles!.First().RelativeFilePath);
+        }
+
+
+        [Fact]
         public async Task GetPackageInfoAsync_ParsesResponse_StoreResult()
         {
             var packageId = "9MZ1SNWT0N5D";

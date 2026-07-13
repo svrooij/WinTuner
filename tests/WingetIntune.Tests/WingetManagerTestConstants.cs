@@ -242,4 +242,39 @@ PackageUrl: https://www.adobe.com/acrobat/acrobat-pro.html
 ShortDescription: Adobe Acrobat Pro PDF editor
 ManifestType: defaultLocale
 ManifestVersion: 1.4.0";
+
+    // dotPDN PaintDotNet - a package with InstallerType: zip and NestedInstallerType: wix (for system installs)
+    internal const string paintDotNetYaml = @"PackageIdentifier: dotPDN.PaintDotNet
+PackageVersion: 5.1.12
+DefaultLocale: en-US
+ManifestType: version
+ManifestVersion: 1.6.0";
+
+    internal const string paintDotNetInstallYaml = @"PackageIdentifier: dotPDN.PaintDotNet
+PackageVersion: 5.1.12
+InstallerType: zip
+NestedInstallerType: wix
+NestedInstallerFiles:
+- RelativeFilePath: PaintDotNet.msi
+Scope: machine
+InstallModes:
+- interactive
+- silent
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/paintdotnet/release/releases/download/v5.1.12/paint.net.5.1.12.zip
+  InstallerSha256: AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899
+ManifestType: installer
+ManifestVersion: 1.6.0";
+
+    internal const string paintDotNetLocaleYaml = @"PackageIdentifier: dotPDN.PaintDotNet
+PackageVersion: 5.1.12
+PackageLocale: en-US
+Publisher: dotPDN LLC
+PublisherUrl: https://www.getpaint.net/
+PackageName: Paint.NET
+PackageUrl: https://www.getpaint.net/
+ShortDescription: Paint.NET is free image and photo editing software
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0";
 }

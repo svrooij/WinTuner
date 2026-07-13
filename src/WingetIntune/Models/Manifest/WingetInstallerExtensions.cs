@@ -12,7 +12,7 @@ internal static class WingetInstallerExtensions
     private static Winget.CommunityRepository.Models.WingetInstaller? singleOrDefault(this IList<Winget.CommunityRepository.Models.WingetInstaller> installers, InstallerType installerType, Architecture architecture, InstallerContext installerContext, string? locale = null)
     {
         return installers.FirstOrDefault(i =>
-            (i.ParseInstallerType() == installerType || installerType == InstallerType.Unknown)
+            (i.ParseInstallerType() == installerType || installerType == InstallerType.Unknown || (i.ParseInstallerType() == InstallerType.Zip && !string.IsNullOrEmpty(i.NestedInstallerType) && EnumParsers.ParseInstallerType(i.NestedInstallerType) == installerType))
             && (i.InstallerArchitecture() == architecture || (architecture == Architecture.Unknown && i.InstallerArchitecture() == Architecture.X64))
             && (i.ParseInstallerContext() == installerContext || installerContext == InstallerContext.Unknown)
             && (string.IsNullOrWhiteSpace(locale) || i.InstallerLocale == locale));
