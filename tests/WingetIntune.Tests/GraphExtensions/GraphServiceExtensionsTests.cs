@@ -37,7 +37,40 @@ public class GraphServiceExtensionsTests
     }
 
     [Fact]
-    public async Task Intune_CreateWin32LobAppContentVersionFileAsync_MakesCorrectRequest()
+    public async Task Intune_CreateWin32LobAppContentVersionAsync_UsesConfiguredGraphBaseUrl()
+    {
+        var appId = Guid.NewGuid().ToString();
+        var token = Guid.NewGuid().ToString();
+
+        var handler = Substitute.For<HttpMessageHandlerWrapper>();
+
+        var response = new HttpResponseMessage(HttpStatusCode.Created);
+        response.Content = new StringContent(@"{
+  ""@odata.type"": ""#microsoft.graph.mobileAppContent"",
+  ""id"": ""1""
+}");
+        response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+        handler.AddFakeResponse(
+            $"https://graph.microsoft.us/beta/deviceAppManagement/mobileApps/{appId}/microsoft.graph.win32LobApp/contentVersions",
+            HttpMethod.Post,
+            "{}",
+            response);
+
+        var httpClient = new HttpClient(handler);
+        var graphServiceClient = new GraphServiceClient(
+            httpClient,
+            new WingetIntune.Internal.Msal.StaticAuthenticationProvider(token),
+            GraphCloudEnvironments.USGov.GraphBetaEndpoint);
+
+        var result = await graphServiceClient.Intune_CreateWin32LobAppContentVersionAsync(appId, CancellationToken.None)!;
+        Assert.Equal("1", result!.Id);
+    }
+
+    [Theory]
+    [InlineData("https://graph.microsoft.com/beta")]
+    [InlineData("https://graph.microsoft.us/beta")]
+    public async Task Intune_CreateWin32LobAppContentVersionFileAsync_MakesCorrectRequest(string graphBaseUrl)
     {
         var appId = Guid.NewGuid().ToString();
         int contentVersionId = 1;
@@ -63,13 +96,16 @@ public class GraphServiceExtensionsTests
         response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
         handler.AddFakeResponse(
-            $"https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/{appId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files",
+            $"{graphBaseUrl}/deviceAppManagement/mobileApps/{appId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files",
             HttpMethod.Post,
             "{\"name\":\"test\",\"size\":1}",
             response);
 
         var httpClient = new HttpClient(handler);
-        var graphServiceClient = new GraphServiceClient(httpClient, new WingetIntune.Internal.Msal.StaticAuthenticationProvider(token));
+        var graphServiceClient = new GraphServiceClient(
+            httpClient,
+            new WingetIntune.Internal.Msal.StaticAuthenticationProvider(token),
+            graphBaseUrl);
 
         var mobileAppFileContent = new MobileAppContentFile
         {
@@ -82,8 +118,10 @@ public class GraphServiceExtensionsTests
         Assert.NotNull(result);
     }
 
-    [Fact]
-    public async Task Intune_CommitWin32LobAppContentVersionFileAsync_MakesCorrectRequest()
+    [Theory]
+    [InlineData("https://graph.microsoft.com/beta")]
+    [InlineData("https://graph.microsoft.us/beta")]
+    public async Task Intune_CommitWin32LobAppContentVersionFileAsync_MakesCorrectRequest(string graphBaseUrl)
     {
         var appId = Guid.NewGuid().ToString();
         int contentVersionId = 1;
@@ -100,13 +138,16 @@ public class GraphServiceExtensionsTests
         response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
         handler.AddFakeResponse(
-            $"https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/{appId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files/{fileId}/commit",
+            $"{graphBaseUrl}/deviceAppManagement/mobileApps/{appId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files/{fileId}/commit",
             HttpMethod.Post,
             @"{""fileEncryptionInfo"":{""encryptionKey"":""test"",""initializationVector"":null,""mac"":null,""macKey"":null,""profileIdentifier"":null,""fileDigest"":""test"",""fileDigestAlgorithm"":""test""}}",
             response);
 
         var httpClient = new HttpClient(handler);
-        var graphServiceClient = new GraphServiceClient(httpClient, new WingetIntune.Internal.Msal.StaticAuthenticationProvider(token));
+        var graphServiceClient = new GraphServiceClient(
+            httpClient,
+            new WingetIntune.Internal.Msal.StaticAuthenticationProvider(token),
+            graphBaseUrl);
 
         var body = new WingetIntune.Graph.FileEncryptionInfo
         {
@@ -118,8 +159,10 @@ public class GraphServiceExtensionsTests
         await graphServiceClient.Intune_CommitWin32LobAppContentVersionFileAsync(appId, contentVersionId.ToString(), fileId, body, CancellationToken.None)!;
     }
 
-    [Fact]
-    public async Task Intune_GetWin32LobAppContentVersionFileAsync_MakesCorrectRequest()
+    [Theory]
+    [InlineData("https://graph.microsoft.com/beta")]
+    [InlineData("https://graph.microsoft.us/beta")]
+    public async Task Intune_GetWin32LobAppContentVersionFileAsync_MakesCorrectRequest(string graphBaseUrl)
     {
         var appId = Guid.NewGuid().ToString();
         int contentVersionId = 1;
@@ -146,12 +189,15 @@ public class GraphServiceExtensionsTests
         response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
         handler.AddFakeResponse(
-            $"https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/{appId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files/{fileId}",
+            $"{graphBaseUrl}/deviceAppManagement/mobileApps/{appId}/microsoft.graph.win32LobApp/contentVersions/{contentVersionId}/files/{fileId}",
             HttpMethod.Get,
             response);
 
         var httpClient = new HttpClient(handler);
-        var graphServiceClient = new GraphServiceClient(httpClient, new WingetIntune.Internal.Msal.StaticAuthenticationProvider(token));
+        var graphServiceClient = new GraphServiceClient(
+            httpClient,
+            new WingetIntune.Internal.Msal.StaticAuthenticationProvider(token),
+            graphBaseUrl);
         var result = await graphServiceClient.Intune_GetWin32LobAppContentVersionFileAsync(appId, contentVersionId.ToString(), fileId, CancellationToken.None)!;
 
         Assert.NotNull(result);

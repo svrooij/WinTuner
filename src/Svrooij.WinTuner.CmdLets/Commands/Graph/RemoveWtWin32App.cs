@@ -43,7 +43,7 @@ public partial class RemoveWtWin32App : BaseIntuneCmdlet
     {
         logger?.LogInformation("Removing app {appId} from Intune", AppId);
 
-        var graphServiceClient = gcf!.CreateClient(provider);
+        var graphServiceClient = gcf!.CreateClient(provider, Graph.ConnectWtWinTuner.GraphEndpoint.GraphBetaEndpoint);
 
         // Load the app to get the relationships
         var app = await graphServiceClient.DeviceAppManagement.MobileApps[AppId].GetAsync(cancellationToken: cancellationToken);

@@ -28,7 +28,7 @@ public static class WingetServiceCollectionExtension
         services.AddKiotaHandlers();
         services.AddHttpClient<Graph.GraphClientFactory>((sp, client) =>
         {
-            client.BaseAddress = new Uri("https://graph.microsoft.com/beta");
+            client.BaseAddress = new Uri(Graph.GraphCloudEnvironments.Global.GraphBetaEndpoint);
         }).AttachKiotaHandlers();
 
         services.AddTransient<IFileManager, Os.DefaultFileManager>();

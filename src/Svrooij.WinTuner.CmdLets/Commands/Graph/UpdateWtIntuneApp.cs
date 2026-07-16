@@ -77,7 +77,7 @@ public partial class UpdateWtIntuneApp : BaseIntuneCmdlet
     {
         logger?.LogInformation("Updating app {appId} in Intune", AppId);
 
-        var graphServiceClient = gcf!.CreateClient(provider);
+        var graphServiceClient = gcf!.CreateClient(provider, ConnectWtWinTuner.GraphEndpoint.GraphBetaEndpoint);
 
         if (Categories is not null && Categories.Any())
         {
