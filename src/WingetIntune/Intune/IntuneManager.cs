@@ -385,7 +385,6 @@ public partial class IntuneManager
         await fileManager.ExtractFileToFolderAsync(intuneFilePath, tempFolder, cancellationToken);
 
         var info = IntuneMetadata.GetApplicationInfo(await fileManager.ReadAllBytesAsync(IntuneMetadata.GetMetadataPath(tempFolder), cancellationToken))!;
-        var intuneFileData = await fileManager.ReadAllBytesAsync(IntuneMetadata.GetContentsPath(tempFolder), cancellationToken);
 
         var contentVersion = await graphServiceClient.Intune_CreateWin32LobAppContentVersionAsync(appId, cancellationToken);
 
@@ -396,7 +395,7 @@ public partial class IntuneManager
             Name = info.FileName,
             IsDependency = false,
             Size = info.UnencryptedContentSize,
-            SizeEncrypted = intuneFileData.LongLength,
+            SizeEncrypted = fileManager.GetFileSize(IntuneMetadata.GetContentsPath(tempFolder)),
             Manifest = null,
         };
 
