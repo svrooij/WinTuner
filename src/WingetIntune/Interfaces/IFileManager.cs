@@ -22,6 +22,8 @@ public interface IFileManager
     bool FileExists(string path);
     long GetFileSize(string path);
 
+    Stream OpenRead(string path);
+
     Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken);
 
     Task WriteAllBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken);

@@ -31,28 +31,45 @@ public partial class ChunkedAzureFileUploader : IAzureFileUploader
 
         try
         {
-            byte[] data = await fileManager.ReadAllBytesAsync(filename, cancellationToken);
-            int fileSize = data.Length;
-            int chunkCount = (int)Math.Ceiling((double)fileSize / chunkSize);
-            using var stream = new MemoryStream(data);
-            // Not sure if this is needed, but just to be sure
-            stream.Seek(0, SeekOrigin.Begin);
-            using var reader = new BinaryReader(stream);
+            long fileSize = fileManager.GetFileSize(filename);
+            long chunkCount = chunkSize > 0 && fileSize > 0
+                ? (fileSize + chunkSize - 1) / chunkSize
+                : 0;
 
             List<string> chunks = new();
 
             LogFileChunkInfo(fileSize, chunkCount);
 
-            for (int chunk = 0; chunk < chunkCount; chunk++)
-            {
-                string chunkId = Convert.ToBase64String(Encoding.ASCII.GetBytes(chunk.ToString("0000")));
-                chunks.Add(chunkId);
-                int start = chunk * chunkSize;
-                int length = Math.Min(chunkSize, fileSize - start);
-                byte[] chunkData = reader.ReadBytes(length);
-                //byte[] chunkData = data[start..(start + length)];
+            using var stream = fileManager.OpenRead(filename);
+            byte[] buffer = new byte[chunkSize];
 
-                LogUploadingChunk(chunk, chunkCount, start, start + length);
+            for (long chunk = 0; chunk < chunkCount; chunk++)
+            {
+                int length = chunkSize;
+                long remaining = fileSize - (chunk * chunkSize);
+                if (remaining < length)
+                {
+                    length = (int)remaining;
+                }
+
+                // Read exactly 'length' bytes from the stream into the buffer.
+                int totalRead = 0;
+                while (totalRead < length)
+                {
+                    int read = await stream.ReadAsync(buffer, totalRead, length - totalRead, cancellationToken);
+                    if (read == 0)
+                    {
+                        throw new IOException($"Unexpected end of stream while reading {filename}");
+                    }
+                    totalRead += read;
+                }
+
+                byte[] chunkData = length == chunkSize ? buffer : buffer[..length];
+
+                string chunkId = Convert.ToBase64String(Encoding.ASCII.GetBytes(chunk.ToString("00000")));
+                chunks.Add(chunkId);
+
+                LogUploadingChunk(chunk, chunkCount, chunk * chunkSize, chunk * chunkSize + length);
                 await UploadChunkAsync(chunkId, chunkData, sasUri, cancellationToken);
             }
 
@@ -98,10 +115,10 @@ public partial class ChunkedAzureFileUploader : IAzureFileUploader
     private partial void LogUploadingFile(string Filename, string SasUri);
 
     [LoggerMessage(EventId = 201, Level = LogLevel.Debug, Message = "File is {FileSize} bytes, will be uploaded in {ChunkCount} chunks")]
-    private partial void LogFileChunkInfo(int FileSize, int ChunkCount);
+    private partial void LogFileChunkInfo(long FileSize, long ChunkCount);
 
     [LoggerMessage(EventId = 202, Level = LogLevel.Debug, Message = "Uploading chunk {Chunk} of {ChunkCount} ({Start} - {End})")]
-    private partial void LogUploadingChunk(int Chunk, int ChunkCount, int Start, int End);
+    private partial void LogUploadingChunk(long Chunk, long ChunkCount, long Start, long End);
 
     [LoggerMessage(EventId = 203, Level = LogLevel.Debug, Message = "Finalizing chunk upload")]
     private partial void LogFinalizingUpload();
