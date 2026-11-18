@@ -45,7 +45,6 @@ public partial class ChunkedAzureFileUploader : IAzureFileUploader
 
             for (long chunk = 0; chunk < chunkCount; chunk++)
             {
-                int start = (int)(chunk * chunkSize); // only used for logging; safe because chunkSize fits in int
                 int length = chunkSize;
                 long remaining = fileSize - (chunk * chunkSize);
                 if (remaining < length)
