@@ -226,6 +226,11 @@ public partial class DefaultFileManager : IFileManager
         return new FileInfo(path).Length;
     }
 
+    public Stream OpenRead(string path)
+    {
+        return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 81920, useAsync: true);
+    }
+
     public Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken)
     {
         return File.ReadAllBytesAsync(path, cancellationToken);
